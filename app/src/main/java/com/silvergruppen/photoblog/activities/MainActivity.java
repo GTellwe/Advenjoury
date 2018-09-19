@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -31,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Toolbar mainToolbar;
 
-    private FloatingActionButton addPostBtn;
+
 
     private NavigationView navView;
 
@@ -46,11 +47,16 @@ public class MainActivity extends AppCompatActivity {
     private AchievementsFragment achievementsFragment;
     private AccountFragment accountFragment;
     private String user_id;
+    private String topic, currentAchievement;
+
+    private DrawerLayout mainDrawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mainDrawerLayout = findViewById(R.id.main_drawer_layout);
 
         mainToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(mainToolbar);
@@ -58,9 +64,9 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
-        user_id = mAuth.getCurrentUser().getUid();
 
-        addPostBtn = findViewById(R.id.add_post_btn);
+
+
         navView = findViewById(R.id.nav_view);
 
         if(mAuth.getCurrentUser() != null) {
@@ -97,7 +103,8 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                     achievementsFragment.changeTopic(menuItem.getTitle().toString());
-                    replaceFragment(achievementsFragment);
+                    topic = menuItem.getTitle().toString();
+                    refreshFragment(achievementsFragment);
                     return true;
                 }
             });
@@ -126,14 +133,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            addPostBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
 
-                    Intent newPostIntent = new Intent(MainActivity.this, NewPostActivity.class);
-                    startActivity(newPostIntent);
-                }
-            });
 
 
         }
@@ -218,10 +218,31 @@ public class MainActivity extends AppCompatActivity {
 
     private void replaceFragment(Fragment fragment){
 
+        if(!fragment.equals(achievementsFragment))
+            mainDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        else
+            mainDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.main_container, fragment);
         fragmentTransaction.commit();
 
     }
+    private void refreshFragment(Fragment fragment){
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.detach(fragment);
+        fragmentTransaction.attach(fragment);
+        fragmentTransaction.commit();
+    }
+    public String getTopic(){
+        return topic;
+    }
 
+    public String getCurrentAchievement() {
+        return currentAchievement;
+    }
+
+    public void setCurrentAchievement(String currentAchievement) {
+        this.currentAchievement = currentAchievement;
+    }
 }

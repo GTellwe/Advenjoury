@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -60,11 +61,19 @@ public class NewPostActivity extends AppCompatActivity {
 
     private Bitmap compressedImageFile;
 
+    private String topic, achievement;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_post);
+        // get the topic
+        Bundle b = getIntent().getExtras();
 
+        if(b != null) {
+            topic = b.getString("topic");
+            achievement = b.getString("achievement");
+        }
         storageReference = FirebaseStorage.getInstance().getReference();
         firebaseFirestore = FirebaseFirestore.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
@@ -76,7 +85,7 @@ public class NewPostActivity extends AppCompatActivity {
 
         newPostImage = findViewById(R.id.new_post_image);
         newPostDesc = findViewById(R.id.new_post_desc);
-        newPostBtn  = findViewById(R.id.add_post_btn);
+        newPostBtn  = findViewById(R.id.post_btn);
         newPostProgress = findViewById(R.id.new_post_progress);
 
         newPostImage.setOnClickListener(new View.OnClickListener() {
@@ -95,10 +104,10 @@ public class NewPostActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+
                 final String desc = newPostDesc.getText().toString();
 
-                if(TextUtils.isEmpty(desc) && postImageUri != null){
-
+                if(!TextUtils.isEmpty(desc) && postImageUri != null){
                     newPostProgress.setVisibility(View.VISIBLE);
 
                     final String randomName = UUID.randomUUID().toString();
@@ -140,10 +149,9 @@ public class NewPostActivity extends AppCompatActivity {
                                         postMap.put("image_url", downloadUri);
                                         postMap.put("image_thumb", downloadThumbUrl);
                                         postMap.put("desc",desc);
-                                        postMap.put("user_id",current_user_id);
                                         postMap.put("timestamp",FieldValue.serverTimestamp());
 
-                                        firebaseFirestore.collection("Posts").add(postMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                                        firebaseFirestore.collection(current_user_id+"/"+topic+"/"+achievement).add(postMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                                             @Override
                                             public void onComplete(@NonNull Task<DocumentReference> task) {
 
@@ -204,15 +212,4 @@ public class NewPostActivity extends AppCompatActivity {
         }
     }
 
-    public static String random() {
-        Random generator = new Random();
-        StringBuilder randomStringBuilder = new StringBuilder();
-        int randomLength = generator.nextInt(MAX_LENGTH);
-        char tempChar;
-        for (int i = 0; i < randomLength; i++){
-            tempChar = (char) (generator.nextInt(96) + 32);
-            randomStringBuilder.append(tempChar);
-        }
-        return randomStringBuilder.toString();
-    }
 }

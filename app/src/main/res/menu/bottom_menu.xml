@@ -5,13 +5,13 @@
     <item
         android:id="@+id/bottom_action_home"
         android:icon="@drawable/home_icon"
-        android:title="@string/bottom_home_text" />
+        android:title="" />
     <item
         android:id="@+id/bottom_action_achievement"
         android:icon="@drawable/achievemen_icon"
-        android:title="@string/bottom_achievement_text" />
+        android:title="" />
     <item
         android:id="@+id/bottom_action_account"
         android:icon="@mipmap/baseline_person_black_24"
-        android:title="@string/bottom_account_text" />
+        android:title="" />
 </menu>

@@ -49,9 +49,18 @@ public class BlogRecyclerAdapter extends RecyclerView.Adapter<BlogRecyclerAdapte
 
         viewHolder.setBlogImage(image_url);
 
-        Long milliseconds = blogList.get(i).getTimeStamp().getTime();
-        String dateString = DateFormat.format("MM/dd/yyyy", new Date(milliseconds)).toString();
-        viewHolder.setDate(dateString);
+        if(blogList.get(i).getTimeStamp() != null) {
+
+            Long milliseconds = blogList.get(i).getTimeStamp().getTime();
+            String dateString = DateFormat.format("MM/dd/yyyy", new Date(milliseconds)).toString();
+            viewHolder.setDate(dateString);
+
+        }else {
+
+            viewHolder.setDate(DateFormat.format("MM/dd/yyyy", new Date(0)).toString());
+
+        }
+
     }
 
     @Override
