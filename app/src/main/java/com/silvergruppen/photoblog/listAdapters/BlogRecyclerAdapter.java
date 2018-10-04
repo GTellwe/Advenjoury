@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.silvergruppen.photoblog.R;
-import com.silvergruppen.photoblog.listItems.BlogPost;
+import com.silvergruppen.photoblog.listItems.PostItem;
 
 
 import java.util.Date;
@@ -20,10 +20,10 @@ import java.util.List;
 
 public class BlogRecyclerAdapter extends RecyclerView.Adapter<BlogRecyclerAdapter.ViewHolder> {
 
-    public List<BlogPost> blogList;
+    public List<PostItem> blogList;
     public Context context;
 
-    public BlogRecyclerAdapter(List<BlogPost> blogList){
+    public BlogRecyclerAdapter(List<PostItem> blogList){
 
         this.blogList = blogList;
 
@@ -33,7 +33,7 @@ public class BlogRecyclerAdapter extends RecyclerView.Adapter<BlogRecyclerAdapte
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
 
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.blog_list_item, viewGroup, false);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.post_list_item, viewGroup, false);
 
         context = viewGroup.getContext();
         return new ViewHolder(view);
@@ -79,21 +79,23 @@ public class BlogRecyclerAdapter extends RecyclerView.Adapter<BlogRecyclerAdapte
             super(itemView);
             mView = itemView;
         }
+
         public void setDescText(String descText){
 
-                descView = mView.findViewById(R.id.blog_desc);
+                descView = mView.findViewById(R.id.post_item_username);
                 descView.setText(descText);
 
         }
 
         public void setBlogImage(String downloadUri){
 
-            blogImageView = mView.findViewById(R.id.blog_image);
+            blogImageView = mView.findViewById(R.id.post_item_image);
             Glide.with(context).load(downloadUri).into(blogImageView);
         }
+
         public void setDate(String date){
 
-            blogDate = mView.findViewById(R.id.blog_date);
+            blogDate = mView.findViewById(R.id.post_item_date);
             blogDate.setText(date);
 
         }

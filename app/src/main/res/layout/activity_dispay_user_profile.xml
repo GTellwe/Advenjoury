@@ -1,20 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".fragments.AccountFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/account_constraint_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/account_name"
+            android:id="@+id/display_account_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -27,32 +21,32 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/profile_image" />
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/profile_image"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/display_profile_image"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/display_account_name" />
 
-        <TextView
-            android:id="@+id/level_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="50dp"
-            android:text="@string/default_level_text"
-            android:textSize="20sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/account_name" />
+    <TextView
+        android:id="@+id/dislay_level_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/default_level_text"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/display_profile_image" />
 
         <ProgressBar
-            android:id="@+id/progressBar2"
+            android:id="@+id/display_account_progressbar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -62,11 +56,11 @@
             android:indeterminate="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/level_text"
+            app:layout_constraintTop_toBottomOf="@+id/dislay_level_text"
             tools:visibility="visible" />
 
         <ListView
-            android:id="@+id/account_list_view"
+            android:id="@+id/display_account_list_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginBottom="8dp"
@@ -75,10 +69,10 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:divider="@null"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout"></ListView>
+            app:layout_constraintTop_toBottomOf="@+id/middle_constraintLayout"></ListView>
 
         <android.support.constraint.ConstraintLayout
-            android:id="@+id/constraintLayout"
+            android:id="@+id/middle_constraintLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -86,10 +80,10 @@
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/progressBar2">
+            app:layout_constraintTop_toBottomOf="@+id/display_account_progressbar">
 
             <TextView
-                android:id="@+id/account_post_number_text_view"
+                android:id="@+id/display_account_post_number_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
@@ -98,25 +92,25 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/account_post_number_text"
                 android:textSize="20sp"
-                app:layout_constraintBottom_toTopOf="@+id/account_post_number_title"
-                app:layout_constraintEnd_toStartOf="@+id/divider4"
+                app:layout_constraintBottom_toTopOf="@+id/display_account_post_number_title"
+                app:layout_constraintEnd_toStartOf="@+id/display_divider4"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/account_achivement_number_text_view"
+                android:id="@+id/display_account_achivement_number_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
                 android:text="@string/account_post_number_text"
                 android:textSize="20sp"
-                app:layout_constraintEnd_toStartOf="@+id/divider5"
-                app:layout_constraintStart_toEndOf="@+id/divider4"
+                app:layout_constraintEnd_toStartOf="@+id/display_divider5"
+                app:layout_constraintStart_toEndOf="@+id/display_divider4"
                 tools:layout_editor_absoluteY="4dp" />
 
             <TextView
-                android:id="@+id/account_followers_text_view"
+                android:id="@+id/display_account_followers_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
@@ -125,11 +119,11 @@
                 android:text="@string/account_post_number_text"
                 android:textSize="20sp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/divider5"
+                app:layout_constraintStart_toEndOf="@+id/display_divider5"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <View
-                android:id="@+id/divider4"
+                android:id="@+id/display_divider4"
                 android:layout_width="1dp"
                 android:layout_height="30dp"
                 android:layout_marginStart="80dp"
@@ -140,7 +134,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <View
-                android:id="@+id/divider5"
+                android:id="@+id/display_divider5"
                 android:layout_width="1dp"
                 android:layout_height="30dp"
                 android:layout_marginEnd="80dp"
@@ -149,11 +143,11 @@
                 android:background="?android:attr/listDivider"
                 android:backgroundTint="@color/colorPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/divider4"
+                app:layout_constraintStart_toStartOf="@+id/display_divider4"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/account_post_number_title"
+                android:id="@+id/display_account_post_number_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
@@ -162,11 +156,11 @@
                 android:text="@string/account_post_number_title"
                 android:textSize="10sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/divider4"
+                app:layout_constraintEnd_toStartOf="@+id/display_divider4"
                 app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
-                android:id="@+id/account_achievements_done_title"
+                android:id="@+id/display_account_achievements_done_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
@@ -175,12 +169,12 @@
                 android:text="TextView"
                 android:textSize="10sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/divider5"
-                app:layout_constraintStart_toEndOf="@+id/divider4"
+                app:layout_constraintEnd_toStartOf="@+id/display_divider5"
+                app:layout_constraintStart_toEndOf="@+id/display_divider4"
                 tools:text="@string/account_achievements_done_title_text" />
 
             <TextView
-                android:id="@+id/account_followers_title"
+                android:id="@+id/display_account_followers_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
@@ -190,10 +184,7 @@
                 android:textSize="10sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/divider5" />
+                app:layout_constraintStart_toEndOf="@+id/display_divider5" />
         </android.support.constraint.ConstraintLayout>
 
-    </android.support.constraint.ConstraintLayout>
-
-
-</FrameLayout>
+</android.support.constraint.ConstraintLayout>

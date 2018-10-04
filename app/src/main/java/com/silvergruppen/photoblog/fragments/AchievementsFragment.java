@@ -47,6 +47,8 @@ public class AchievementsFragment extends Fragment {
 
 
     public ArrayList<Achievement> listAchievements;
+    public ArrayList<Achievement> listDisplayedAchievements;
+
     private HashMap<String,Integer> listAchievementsMap;
 
     private AchievementListAdapter achievementListAdapter;
@@ -65,7 +67,9 @@ public class AchievementsFragment extends Fragment {
 
     public String topic;
     public AchievementsFragment() {
-        // Required empty public constructor
+        listAchievements = new ArrayList<>();
+        listDisplayedAchievements = new ArrayList<>();
+        topic = "Summary";
     }
 
 
@@ -88,77 +92,46 @@ public class AchievementsFragment extends Fragment {
         listAchievementsMap = new HashMap<>();
         firebaseFirestore = FirebaseFirestore.getInstance();
 
+
         // Handle the list of achievements
         achievementsListView = view.findViewById(R.id.achievement_list_view);
         achievementsListView.setItemsCanFocus(true);
-        listAchievements = new ArrayList<>();
-        achievementListAdapter = new AchievementListAdapter(getActivity(), R.layout.achievement_list_item, listAchievements);
+
+        achievementListAdapter = new AchievementListAdapter(getActivity(), R.layout.achievement_list_item, listDisplayedAchievements,topic, true);
         achievementsListView.setAdapter(achievementListAdapter);
         achievementsListView.setItemsCanFocus(true);
 
-        // Get the Achievements from firestore
-
-        firebaseFirestore.collection("Achievements")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Map<String,Object> tmpMap = document.getData();
-
-                                if(tmpMap.get("topic").equals(topic)) {
-                                    String name = tmpMap.get("name").toString();
-                                    listAchievements.add(new Achievement(name,topic, tmpMap.get("points").toString(), COLLAPSED_HEIGHT_2
-                                            , EXPANDED_HEIGHT_4, COLLAPSED_HEIGHT_2));
-                                    listAchievementsMap.put(name,listAchievements.size());
-                                }
-
-                                achievementListAdapter.notifyDataSetChanged();
-                            }
-
-                            // Get all the current users posts
-                            Toast.makeText(getContext(), "here", Toast.LENGTH_LONG).show();
-
-                            for(final Achievement achievement : listAchievements) {
-
-                                firebaseFirestore.collection(current_user_id + "/" + topic+"/"+achievement.getName())
-                                        .get()
-                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                if (task.isSuccessful()) {
-                                                    for (DocumentSnapshot document : task.getResult()) {
-
-                                                        Map<String, Object> tmpMap = document.getData();
-                                                        String postText = tmpMap.get("desc").toString();
-                                                        String postImageUrl = tmpMap.get("image_url").toString();
-                                                        Date timestamp = (Date) tmpMap.get("timestamp");
-                                                        achievement.addJournalItem(postText, postImageUrl,timestamp);
-
-                                                    }
-                                                } else {
-
-                                                }
-                                            }
-                                        });
-                            }
-
-                        }
-                    }
-                });
 
 
         return view;
     }
 
 
+
     public void changeTopic(String topic){
 
 
         this.topic = topic;
+        listDisplayedAchievements.clear();
+        for(Achievement achievement : listAchievements) {
+            if (achievement.getTopic().equals(topic))
+                listDisplayedAchievements.add(achievement);
+        }
 
 
     }
 
+    public void addAchievement(Achievement achievement){
+
+        listAchievements.add(achievement);
+
+    }
+
+    public ArrayList<Achievement> getListAchievements() {
+        return listAchievements;
+    }
+
+    public void setListAchievements(ArrayList<Achievement> listAchievements) {
+        this.listAchievements = listAchievements;
+    }
 }

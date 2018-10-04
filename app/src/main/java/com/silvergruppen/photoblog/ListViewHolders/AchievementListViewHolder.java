@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -17,30 +19,32 @@ public class AchievementListViewHolder {
     private TextView textView;
     private LinearLayout journalItems;
     private FloatingActionButton postBtn;
+    private Button markAsDoneBtn;
+    private ImageView checkImage;
 
-    public AchievementListViewHolder(LinearLayout textViewWrap, TextView textView, FloatingActionButton postBtn, LinearLayout journalItems, final Context context) {
+    public AchievementListViewHolder(LinearLayout textViewWrap, TextView textView,
+                                     FloatingActionButton postBtn, LinearLayout journalItems,
+                                     Button markAsDoneBtn, ImageView checkImage,final Context context) {
         super();
         this.textViewWrap = textViewWrap;
         this.textView = textView;
         this.journalItems = journalItems;
         this.postBtn = postBtn;
+        this.markAsDoneBtn = markAsDoneBtn;
+        this.checkImage = checkImage;
 
 
         // handle the post new button actions
 
-        postBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-                Intent newPostIntent = new Intent(context, NewPostActivity.class);
-                Bundle b = new Bundle();
-                MainActivity tmpActivity = (MainActivity) context;
-                b.putString("topic",tmpActivity.getTopic());
-                b.putString("achievement", tmpActivity.getCurrentAchievement());
-                newPostIntent.putExtras(b);
-                context.startActivity(newPostIntent);
-            }
-        });
+    }
+
+    public ImageView getCheckImage() {
+        return checkImage;
+    }
+
+    public void setCheckImage(ImageView checkImage) {
+        this.checkImage = checkImage;
     }
 
     public LinearLayout getJournalItems() {
@@ -71,6 +75,15 @@ public class AchievementListViewHolder {
     public void setPostBtnVisability(int visability){
 
         postBtn.setVisibility(visability);
+    }
+    public void setMarkAsDoneBtnVisability(int visibility){
+
+        markAsDoneBtn.setVisibility(visibility);
+
+    }
+    public void setChecImageVisibility(int visibility){
+
+        checkImage.setVisibility(visibility);
     }
 
 

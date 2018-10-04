@@ -2,7 +2,7 @@
     <string name="app_name">PhotoBlog</string>
     <string name="pass_hint">Password...</string>
     <string name="email_hint">Your email...</string>
-    <string name="login_btn_text">Login to account</string>
+    <string name="login_btn_text">Login</string>
     <string name="register_btn_text">Register New Account</string>
     <string name="action_search_text">Search</string>
     <string name="action_settings_text">Account Settings</string>
@@ -25,4 +25,13 @@
     <string name="bottom_topic_title">Topic</string>
     <string name="bottom_account_title">Accunt</string>
     <string name="bottom_achievement_text">Achievement</string>
+    <string name="default_account_name">Username</string>
+    <string name="latest_achievement_text">Latest Achievements</string>
+    <string name="default_level_text">Level _</string>
+    <string name="achievement_list_item_done_button_text"> Mark achievement as done</string>
+    <string name="search_hint"> Search for profiles...</string>
+    <string name="account_post_number_text" >140</string>
+    <string name="account_post_number_title">Posts</string>
+    <string name="account_followers_title_text" > Followers</string>
+    <string name="account_achievements_done_title_text">Achievements</string>>
 </resources>

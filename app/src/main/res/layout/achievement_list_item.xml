@@ -7,38 +7,61 @@
     android:layout_marginTop="2dp"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:minHeight="0dp"
         android:orientation="horizontal">
 
+
         <TextView
             android:id="@+id/text"
-            android:layout_width="250dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:padding="20dp"
-            android:textSize="18sp"></TextView>
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"></TextView>
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+        <ImageView
+            android:id="@+id/image_view_check_mark"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="140dp"
+            android:layout_marginTop="8dp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@mipmap/icon_checkbox" />
 
-            <TextView
-                android:id="@+id/pointsText"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center"
-                android:background="@drawable/shield"
-                android:gravity="center"
-                android:padding="5dp"
-                android:text="10"
-                android:textSize="10dp"></TextView>
 
-        </LinearLayout>
+        <TextView
+            android:id="@+id/pointsText"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/shield"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="10"
+            android:textSize="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"></TextView>
 
-    </LinearLayout>
+
+
+    </android.support.constraint.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/journal_items"
@@ -57,6 +80,15 @@
         android:visibility="invisible"
         app:backgroundTint="@color/colorMain"
         app:srcCompat="@mipmap/baseline_add_black_48" />
+
+    <Button
+        android:id="@+id/achievement_list_item_done_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/colorMainGrey"
+        android:text="@string/achievement_list_item_done_button_text"
+        android:textColor="@color/colorMainWhite"
+        android:visibility="invisible" />
 
 
 </LinearLayout>

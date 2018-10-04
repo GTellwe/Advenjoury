@@ -2,23 +2,23 @@ package com.silvergruppen.photoblog.fragments;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import android.widget.ListView;
 
-import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.EventListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.silvergruppen.photoblog.activities.MainActivity;
-import com.silvergruppen.photoblog.listItems.BlogPost;
-import com.silvergruppen.photoblog.listAdapters.BlogRecyclerAdapter;
+import com.silvergruppen.photoblog.listAdapters.AchievementListAdapter;
+import com.silvergruppen.photoblog.listAdapters.PostListAdapter;
+import com.silvergruppen.photoblog.listItems.PostItem;
 import com.silvergruppen.photoblog.R;
+import com.silvergruppen.photoblog.other.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,14 +29,19 @@ import java.util.List;
  */
 public class HomeFragment extends Fragment {
 
-    private RecyclerView blogListView;
-    private List<BlogPost> blogList;
+    private static ArrayList<PostItem> postItems;
+    private static ArrayList<User> allUserID;
 
-    private BlogRecyclerAdapter blogRecyclerAdapter;
+    private ListView homeListView;
+
+    private PostListAdapter postListAdapter;
 
     FirebaseFirestore firebaseFirestore;
     public HomeFragment() {
-        // Required empty public constructor
+
+        allUserID = new ArrayList<>();
+        postItems = new ArrayList<>();
+
     }
 
 
@@ -45,32 +50,42 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container,false);
 
-        blogList = new ArrayList<>();
-        blogListView = view.findViewById(R.id.blog_list_view);
-        blogRecyclerAdapter = new BlogRecyclerAdapter(blogList);
-        blogListView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        blogListView.setAdapter(blogRecyclerAdapter);
+        // setup the list view
+        homeListView = view.findViewById(R.id.home_list_view);
+        homeListView.setItemsCanFocus(true);
+        postListAdapter = new PostListAdapter(getActivity(), R.layout.post_list_item, postItems);
+        homeListView.setAdapter(postListAdapter);
+        homeListView.setItemsCanFocus(true);
 
-        firebaseFirestore = FirebaseFirestore.getInstance();
-        firebaseFirestore.collection("Posts").addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-
-                for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-
-                    if(doc.getType() == DocumentChange.Type.ADDED){
-
-                        BlogPost blogPost = doc.getDocument().toObject(BlogPost.class);
-                        blogList.add(blogPost);
-
-                        blogRecyclerAdapter.notifyDataSetChanged();
-
-                    }
-
-                }
-            }
-        });
         return view;
+
     }
 
+
+
+    public ArrayList<User> getAllUserID() {
+        return allUserID;
+    }
+
+    public static void setAllUserID(ArrayList<User> newNllUserID) {
+
+        allUserID = newNllUserID;
+
+    }
+
+    public ArrayList<PostItem> getPostItems() {
+        return postItems;
+    }
+
+    public static void setPostItems(ArrayList<PostItem> newPostItems) {
+
+        postItems.clear();
+        postItems.addAll(newPostItems);
+
+    }
+
+    public void notifyDataSetChanged(){
+
+        postListAdapter.notifyDataSetChanged();
+    }
 }

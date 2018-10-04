@@ -2,6 +2,7 @@ package com.silvergruppen.photoblog.listAdapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,6 +26,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.silvergruppen.photoblog.ListViewHolders.AchievementListViewHolder;
@@ -36,6 +39,7 @@ import com.silvergruppen.photoblog.listItems.AchievementPost;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class AchievementListAdapter extends ArrayAdapter<Achievement> {
@@ -44,16 +48,19 @@ public class AchievementListAdapter extends ArrayAdapter<Achievement> {
     private FirebaseAuth firebaseAuth;
     private FirebaseFirestore firebaseFirestore;
     private String user_id;
-    private FloatingActionButton addPostBtn;
+    private String topic;
+    private boolean editable;
 
     public AchievementListAdapter(Context context, int textViewResourceId,
-                                  ArrayList<Achievement> achievementItems) {
+                                  ArrayList<Achievement> achievementItems, String topic, boolean editable) {
         super(context, textViewResourceId, achievementItems);
         this.achievementItems = achievementItems;
         this.context = context;
         firebaseFirestore = FirebaseFirestore.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
         user_id = firebaseAuth.getCurrentUser().getUid();
+        this.topic = topic;
+        this.editable = editable;
 
     }
 
@@ -74,9 +81,89 @@ public class AchievementListAdapter extends ArrayAdapter<Achievement> {
 
             LinearLayout journalItems = convertView.findViewById(R.id.journal_items);
 
-            addPostBtn = convertView.findViewById(R.id.achievement_item_add_post);
+            FloatingActionButton addPostBtn = convertView.findViewById(R.id.achievement_item_add_post);
 
-            holder = new AchievementListViewHolder(textViewWrap, text,addPostBtn,journalItems, context);
+            Button markAsDone = convertView.findViewById(R.id.achievement_list_item_done_button);
+
+            ImageView checkImage = convertView.findViewById(R.id.image_view_check_mark);
+
+            // if the list is not editable then hide the add and remove post buttons
+
+           if(!editable){
+
+                markAsDone.setVisibility(View.INVISIBLE);
+                addPostBtn.setVisibility(View.INVISIBLE);
+            }
+
+            addPostBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    Intent newPostIntent = new Intent(context, NewPostActivity.class);
+                    Bundle b = new Bundle();
+                    MainActivity tmpActivity = (MainActivity) context;
+                    b.putString("topic",tmpActivity.getTopic());
+                    b.putString("achievement", tmpActivity.getCurrentAchievement());
+                    newPostIntent.putExtras(b);
+                    context.startActivity(newPostIntent);
+                }
+            });
+
+            markAsDone.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    firebaseAuth = FirebaseAuth.getInstance();
+                    final String currentUserID= firebaseAuth.getCurrentUser().getUid();
+                    firebaseFirestore = FirebaseFirestore.getInstance();
+                    // if the achievement is not done by the current user then add the user name to the achievments list of
+                    // users otherwise remove it
+                    if(!achievementItem.isDone()){
+
+                        final HashMap<String, Object> tmpHashMap = new HashMap<>();
+                        tmpHashMap.put("timestamp", FieldValue.serverTimestamp());
+                        firebaseFirestore.collection("Achievements/"+achievementItem.getName()+"/Users").document(currentUserID).set(tmpHashMap)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        // add to Users/achievments as well
+                                        firebaseFirestore.collection("Users/"+currentUserID+"/Achievements").document(achievementItem.getName()).set(tmpHashMap)
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+
+                                                        Toast.makeText(context,"Achievement marked as done",Toast.LENGTH_LONG).show();
+                                                        achievementItem.setDone(true);
+                                                    }
+                                                });
+                                    }
+                                });
+
+                    } else {
+
+                        firebaseFirestore.collection("Achievements/"+achievementItem.getName()+"/Users").document(currentUserID).delete()
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        firebaseFirestore.collection("Users/"+currentUserID+"/Achievements").document(achievementItem.getName()).delete()
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        Toast.makeText(context,"Achievement marked as not done",Toast.LENGTH_LONG).show();
+                                                        achievementItem.setDone(false);
+                                                    }
+                                                });
+
+                                    }
+                                });
+
+
+                    }
+
+                }
+            });
+
+            holder = new AchievementListViewHolder(textViewWrap, text,addPostBtn,journalItems,markAsDone,checkImage, context);
 
             // set listener to the list items
             convertView.setClickable(true);
@@ -86,8 +173,13 @@ public class AchievementListAdapter extends ArrayAdapter<Achievement> {
                 public void onClick(View view) {
 
                     toggle(view, position, achievementItem);
-                    MainActivity tmpMainActivity = (MainActivity) getContext();
-                    tmpMainActivity.setCurrentAchievement(achievementItem.getName());
+                    MainActivity tmpMainActivity;
+                    if(getContext().getClass() == MainActivity.class) {
+
+                        tmpMainActivity = (MainActivity) getContext();
+                        tmpMainActivity.setCurrentAchievement(achievementItem.getName());
+
+                    }
                 }
             });
         } else
@@ -97,7 +189,13 @@ public class AchievementListAdapter extends ArrayAdapter<Achievement> {
                 achievementItem.getCurrentHeight());
         holder.getTextViewWrap().setLayoutParams(layoutParams);
         holder.getTextView().setText(achievementItem.getName());
+        // check if the checkmark should be present
+        if(achievementItem.isDone())
+            holder.setChecImageVisibility(View.VISIBLE);
+        else
+            holder.setChecImageVisibility(View.INVISIBLE);
 
+        // check if there is missing any lisitem in the achievement list and add if ther is
         if( achievementItem.getBlogPostList() != null && holder.getJournalItems().getChildCount() != achievementItem.getBlogPostList().size()){
             holder.getJournalItems().removeAllViews();
             for(int j =0; j<achievementItem.getBlogPostList().size();j++) {
@@ -237,7 +335,7 @@ public class AchievementListAdapter extends ArrayAdapter<Achievement> {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                listItem.setOpen(!listItem.isOpen());
+                listItem.setOpen(!listItem.isOpen(),editable);
                 listItem.setCurrentHeight(toHeight);
                 if(listItem.isOpen())
 

@@ -1,10 +1,21 @@
 package com.silvergruppen.photoblog.listItems;
 
+import android.graphics.Color;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.silvergruppen.photoblog.ListViewHolders.AchievementListViewHolder;
+import com.silvergruppen.photoblog.R;
 
+import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,18 +28,23 @@ public class Achievement {
     private AchievementListViewHolder holder;
     private boolean open;
     private String topic;
-    private int expandedHeight, collapsedHeight, currentHeight;
+    private int expandedHeight = 600, collapsedHeight = 250, currentHeight = 250;
 
     private ArrayList<AchievementPost> postList;
 
     private HashMap<Object,Date> postHashMap;
+
+    private boolean done;
+
+    private FirebaseAuth firebaseAuth;
+    private FirebaseFirestore firebaseFirestore;
 
 
     public Achievement(){
 
     }
 
-    public Achievement(String name,String topic, String points, int collapsedHeight, int expandedHeight, int currentHeight) {
+    public Achievement(String name,String topic, String points, boolean done) {
         this.name = name;
         this.points = points;
         this.collapsedHeight = collapsedHeight;
@@ -37,6 +53,20 @@ public class Achievement {
         this.topic = topic;
         postList = new ArrayList<>();
         postHashMap = new HashMap<>();
+        this.done = done;
+
+    }
+
+    public Achievement(String name,String topic, String points, int collapsedHeight, int expandedHeight, int currentHeight, boolean done) {
+        this.name = name;
+        this.points = points;
+        this.collapsedHeight = collapsedHeight;
+        this.expandedHeight = expandedHeight;
+        this.currentHeight = currentHeight;
+        this.topic = topic;
+        postList = new ArrayList<>();
+        postHashMap = new HashMap<>();
+        this.done = done;
 
     }
     public void addJournalItem(String text, String imagePath, Date timestamp){
@@ -90,12 +120,18 @@ public class Achievement {
         return open;
     }
 
-    public void setOpen(boolean open) {
+    public void setOpen(boolean open, boolean editable) {
         this.open = open;
-        if(open)
-            holder.setPostBtnVisability(View.VISIBLE);
-        else
-            holder.setPostBtnVisability(View.INVISIBLE);
+
+
+            if (open && editable) {
+                holder.setMarkAsDoneBtnVisability(View.VISIBLE);
+                holder.setPostBtnVisability(View.VISIBLE);
+            } else {
+                holder.setMarkAsDoneBtnVisability(View.INVISIBLE);
+                holder.setPostBtnVisability(View.INVISIBLE);
+            }
+
     }
 
     public void setHolder(AchievementListViewHolder holder) {
@@ -127,5 +163,22 @@ public class Achievement {
     public HashMap<Object,Date> getBlogListViewHasMap() {
 
         return postHashMap;
+    }
+
+    public boolean isDone() {
+        return done;
+    }
+
+    public void setDone(boolean done) {
+        this.done = done;
+
+    }
+
+    public int getColor() {
+
+        if(done)
+            return Color.GREEN;
+        else
+            return  Color.WHITE;
     }
 }
