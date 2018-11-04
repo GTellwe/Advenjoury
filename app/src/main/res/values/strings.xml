@@ -30,8 +30,9 @@
     <string name="default_level_text">Level _</string>
     <string name="achievement_list_item_done_button_text"> Mark achievement as done</string>
     <string name="search_hint"> Search for profiles...</string>
-    <string name="account_post_number_text" >140</string>
+    <string name="account_post_number_text">140</string>
     <string name="account_post_number_title">Posts</string>
-    <string name="account_followers_title_text" > Followers</string>
-    <string name="account_achievements_done_title_text">Achievements</string>>
+    <string name="account_followers_title_text"> Followers</string>
+    <string name="account_achievements_done_title_text">Achievements</string>
+    <string name="account_items_done_text">Achievements</string>>
 </resources>

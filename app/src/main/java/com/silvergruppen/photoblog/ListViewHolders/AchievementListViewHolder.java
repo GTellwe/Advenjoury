@@ -21,10 +21,11 @@ public class AchievementListViewHolder {
     private FloatingActionButton postBtn;
     private Button markAsDoneBtn;
     private ImageView checkImage;
+    private TextView pointsText;
 
     public AchievementListViewHolder(LinearLayout textViewWrap, TextView textView,
                                      FloatingActionButton postBtn, LinearLayout journalItems,
-                                     Button markAsDoneBtn, ImageView checkImage,final Context context) {
+                                     Button markAsDoneBtn, ImageView checkImage,final Context context, TextView pointsText) {
         super();
         this.textViewWrap = textViewWrap;
         this.textView = textView;
@@ -32,11 +33,20 @@ public class AchievementListViewHolder {
         this.postBtn = postBtn;
         this.markAsDoneBtn = markAsDoneBtn;
         this.checkImage = checkImage;
+        this.pointsText = pointsText;
 
 
         // handle the post new button actions
 
 
+    }
+
+    public TextView getPointsText() {
+        return pointsText;
+    }
+
+    public void setPointsText(TextView pointsText) {
+        this.pointsText = pointsText;
     }
 
     public ImageView getCheckImage() {

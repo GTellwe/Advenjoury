@@ -1,14 +1,17 @@
 package com.silvergruppen.photoblog.fragments;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -28,7 +31,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  */
 public class AccountFragment extends Fragment {
 
-    private TextView accountName, level;
+    private TextView accountName, levelTextView, achievementsDoneTextView, postsTextView, followersTextView;
     private CircleImageView imageView;
     private ProgressBar levelProgress;
 
@@ -43,9 +46,16 @@ public class AccountFragment extends Fragment {
 
     private static String userName;
     private static String imageURL;
+    private int achievementsDone, numberOFPosts, numberOfFollowers, numberOfPoints;
+
 
     public AccountFragment() {
+
         achievemensDoneList = new ArrayList<>();
+        achievementsDone = 0;
+        numberOFPosts = 0;
+        numberOfFollowers = 0;
+
     }
 
 
@@ -61,6 +71,8 @@ public class AccountFragment extends Fragment {
         // get the username from Firebase and set the image and headline
         accountName = view.findViewById(R.id.account_name);
         imageView = view.findViewById(R.id.profile_image);
+
+
         firebaseAuth = FirebaseAuth.getInstance();
         user_id = firebaseAuth.getCurrentUser().getUid();
         firebaseFirestore = FirebaseFirestore.getInstance();
@@ -75,6 +87,26 @@ public class AccountFragment extends Fragment {
             Glide.with(getContext()).setDefaultRequestOptions(placeholderRequest).load(imageURL).into(imageView);
         }
 
+        // set the achievements done text
+        achievementsDoneTextView = view.findViewById(R.id.account_achivement_number_text_view);
+        achievementsDoneTextView.setText(Integer.toString(achievementsDone));
+
+        // set the posts done text
+        postsTextView = view.findViewById(R.id.account_post_number_text_view);
+        postsTextView.setText(Integer.toString(numberOFPosts));
+
+        // set the number of followers text
+        followersTextView = view.findViewById(R.id.account_followers_text_view);
+        followersTextView.setText(Integer.toString(numberOfFollowers));
+
+        // set the level
+        levelTextView =  view.findViewById(R.id.level_text);
+        levelTextView.setText("Level "+Integer.toString(convertPointsToLevel()));
+
+        // set the progress
+        levelProgress = view.findViewById(R.id.account_progress);
+        levelProgress.setProgress(getLevelProgress());
+
         // Set up the list view
 
         accountListView = view.findViewById(R.id.account_list_view);
@@ -87,7 +119,36 @@ public class AccountFragment extends Fragment {
     }
 
 
+    private int convertPointsToLevel(){
 
+        int level =0;
+        int pointsPerLevel = 30;
+        int pointsLeft = numberOfPoints-pointsPerLevel;
+
+        while(pointsLeft>0){
+
+            level++;
+            pointsPerLevel = pointsPerLevel + 10;
+            pointsLeft = pointsLeft-pointsPerLevel;
+        }
+        return level;
+    }
+    private int getLevelProgress(){
+
+        int progress =0;
+        int pointsPerLevel = 30;
+        int pointsLeft = numberOfPoints-pointsPerLevel;
+
+        while(pointsLeft>0){
+
+            progress = pointsLeft;
+            pointsPerLevel = pointsPerLevel + 10;
+            pointsLeft = pointsLeft-pointsPerLevel;
+
+        }
+        return progress;
+
+    }
     public String getUserName() {
         return userName;
     }
@@ -114,8 +175,28 @@ public class AccountFragment extends Fragment {
     public void addAchievementDone(Achievement achievement){
 
         achievemensDoneList.add(achievement);
+        achievementsDone = achievemensDoneList.size();
+
+
         if(achievementListAdapter != null)
             achievementListAdapter.notifyDataSetChanged();
 
+    }
+    public void setNumberOFPosts(int numberOFPosts){
+
+        this.numberOFPosts = numberOFPosts;
+    }
+    public void setNumberOfFollowers(int numberOfFollowers){
+
+        this.numberOfFollowers = numberOfFollowers;
+    }
+
+    public void setNumberOfPoints(int numberOfPoints) {
+        Log.d("points"+numberOfPoints, "\n \n \n \n \n");
+        this.numberOfPoints = numberOfPoints;
+    }
+
+    public int getNumberOfPoints() {
+        return numberOfPoints;
     }
 }

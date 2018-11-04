@@ -14,12 +14,14 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -42,19 +44,16 @@ import com.silvergruppen.photoblog.other.User;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar mainToolbar;
-
     private ProgressBar progress;
-
-
-
     private NavigationView navView;
-
     private FirebaseAuth mAuth;
     private FirebaseFirestore firebaseFirestore;
 
@@ -69,10 +68,22 @@ public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout mainDrawerLayout;
 
+    private Semaphore semaphore;
+
+
     private ArrayList<Achievement> achievementsList;
     private HashMap<String, Object> achievementHashmap;
     private ArrayList<User> allUsersID;
     private ArrayList<PostItem> allPostItems;
+
+    private TextView navigationProfileText;
+    private CircleImageView navigationProfileImage;
+
+    public static int threads;
+
+    private Context context;
+
+
 
     private Context mContext;
 
@@ -82,18 +93,28 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         progress = findViewById(R.id.progressBar_main);
         mContext = this;
-        allPostItems = new ArrayList<>();
-        allUsersID = new ArrayList<>();
+        threads = 0;
         changeBottomMenuIconSize();
         achievementHashmap = new HashMap<>();
+        context = this;
+
+        allPostItems = new ArrayList<>();
+        allUsersID = new ArrayList<>();
         // Initialize fragments
         homeFragment = new HomeFragment();
         achievementsFragment = new AchievementsFragment();
         accountFragment = new AccountFragment();
 
+        accountFragment.setAchievemensDoneList(new ArrayList<Achievement>());
+        achievementsFragment.setListAchievements(new ArrayList<Achievement>());
+
 
 
         mainDrawerLayout = findViewById(R.id.main_drawer_layout);
+        navView = mainDrawerLayout.findViewById(R.id.nav_view);
+        View navHead = navView.getHeaderView(0);
+        navigationProfileImage = navHead.findViewById(R.id.nav_profile_image);
+        navigationProfileText = navHead.findViewById(R.id.nav_profile_text);
 
         mainToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(mainToolbar);
@@ -175,27 +196,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         }
-    }
-
-    private void changeBottomMenuIconSize() {
-
-        BottomNavigationView bottomNavigation = (BottomNavigationView) findViewById(R.id.main_bottom_nav);
-
-        BottomNavigationMenuView menuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-
-        for (int i = 0; i < menuView.getChildCount(); i++) {
-            final View iconView = menuView.getChildAt(i).findViewById(android.support.design.R.id.icon);
-            final ViewGroup.LayoutParams layoutParams = iconView.getLayoutParams();
-            final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-            layoutParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14, displayMetrics);
-            layoutParams.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14, displayMetrics);
-            iconView.setLayoutParams(layoutParams);
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if(currentUser == null){
@@ -220,12 +220,9 @@ public class MainActivity extends AppCompatActivity {
                             finish();
 
                         } else{
-                            accountFragment.setAchievemensDoneList(new ArrayList<Achievement>());
-                            achievementsFragment.setListAchievements(new ArrayList<Achievement>());
-                            loadAchievements();
-                            loadNameAndProfilePicture();
-                            //loadPostItems();
-                            loadAllusers();
+
+                            loadAllUserData();
+
                         }
 
                     } else {
@@ -238,6 +235,31 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+
+    }
+
+    private void changeBottomMenuIconSize() {
+
+        BottomNavigationView bottomNavigation = (BottomNavigationView) findViewById(R.id.main_bottom_nav);
+
+        BottomNavigationMenuView menuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+
+        for (int i = 0; i < menuView.getChildCount(); i++) {
+            final View iconView = menuView.getChildAt(i).findViewById(android.support.design.R.id.icon);
+            final ViewGroup.LayoutParams layoutParams = iconView.getLayoutParams();
+            final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+            layoutParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14, displayMetrics);
+            layoutParams.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14, displayMetrics);
+            iconView.setLayoutParams(layoutParams);
+        }
+    }
+
+
 
 
     @Override
@@ -268,6 +290,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+    public void loadAllUserData(){
+
+        loadAchievements();
+        loadNameAndProfilePicture();
+        loadAllusers();
+        loadNUmberOfPosts();
+        loadNumberOfFollowers();
+
+    }
     private void logOut(){
 
         mAuth.signOut();
@@ -284,8 +316,11 @@ public class MainActivity extends AppCompatActivity {
 
         if(!fragment.equals(achievementsFragment))
             mainDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        else
+        else {
+
             mainDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+            mainDrawerLayout.openDrawer(Gravity.LEFT);
+        }
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.main_container, fragment);
@@ -309,17 +344,32 @@ public class MainActivity extends AppCompatActivity {
     public void setCurrentAchievement(String currentAchievement) {
         this.currentAchievement = currentAchievement;
     }
+    private void loadingTaskDone(){
+
+        if(threads ==0) {
+            progress.setVisibility(View.INVISIBLE);
+
+        }
 
 
-    private void loadAchievements(){
+    }
+
+    public void loadAchievements(){
 
         /**
          *  Loads all the achievements into achievmentlist. Loads all the posts into the achievments.
          *  Checks if the achievment is done
          *
          */
+
         firebaseFirestore = FirebaseFirestore.getInstance();
         achievementsList = new ArrayList<>();
+        achievementsList.clear();
+        achievementsFragment.clearAchievementList();
+        accountFragment.getAchievemensDoneList().clear();
+
+        progress.setVisibility(View.VISIBLE);
+        threads++;
         firebaseFirestore.collection("Achievements")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -331,19 +381,21 @@ public class MainActivity extends AppCompatActivity {
                                 Map<String,Object> tmpMap = document.getData();
 
 
-                                    final String name = tmpMap.get("name").toString();
-                                    // check if user has done achievement
+                                final String name = tmpMap.get("name").toString();
+                                // check if user has done achievement
 
-                                    Achievement tmpAchievement =new Achievement(name, tmpMap.get("topic").toString(), tmpMap.get("points").toString(),false);
-                                    achievementsList.add(tmpAchievement);
-                                    achievementsFragment.addAchievement(tmpAchievement);
-                                    achievementHashmap.put(name,tmpAchievement);
+                                Achievement tmpAchievement =new Achievement(name, tmpMap.get("topic").toString(), tmpMap.get("points").toString(),false);
+                                achievementsList.add(tmpAchievement);
+                                achievementsFragment.addAchievement(tmpAchievement);
+                                achievementHashmap.put(name,tmpAchievement);
 
 
 
                             }
                             // Check if the achievements are done by the current user
                             for(final Achievement achievement : achievementsList){
+                                threads++;
+                                progress.setVisibility(View.VISIBLE);
                                 firebaseFirestore.collection("Achievements/"+achievement.getName()+"/Users").document(current_user_id).get()
                                         .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                             @Override
@@ -353,10 +405,16 @@ public class MainActivity extends AppCompatActivity {
 
                                                     achievement.setDone(true);
                                                     accountFragment.addAchievementDone(achievement);
+                                                    accountFragment.setNumberOfPoints(accountFragment.getNumberOfPoints()+ Integer.parseInt(achievement.getPoints()));
+
                                                 }
                                                 else
                                                     achievement.setDone(false);
+
+                                                threads--;
+                                                loadingTaskDone();
                                             }
+
                                         });
 
                             }
@@ -365,8 +423,9 @@ public class MainActivity extends AppCompatActivity {
 
 
                             for(final Achievement achievement : achievementsList) {
-
-                                firebaseFirestore.collection(current_user_id + "/" + achievement.getTopic()+"/"+achievement.getName())
+                                threads++;
+                                progress.setVisibility(View.VISIBLE);
+                                firebaseFirestore.collection(current_user_id)
                                         .get()
                                         .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                             @Override
@@ -375,20 +434,30 @@ public class MainActivity extends AppCompatActivity {
                                                     for (DocumentSnapshot document : task.getResult()) {
 
                                                         Map<String, Object> tmpMap = document.getData();
-                                                        String postText = tmpMap.get("desc").toString();
-                                                        String postImageUrl = tmpMap.get("image_url").toString();
-                                                        Date timestamp = (Date) tmpMap.get("timestamp");
-                                                        achievement.addJournalItem(postText, postImageUrl,timestamp);
+                                                        String tmpTopic = tmpMap.get("topic").toString();
+                                                        String achievementName = tmpMap.get("achievement_name").toString();
 
+                                                        if(tmpTopic.equals(achievement.getTopic()) && achievementName.equals(achievement.getName())) {
+                                                            String postText = tmpMap.get("desc").toString();
+                                                            String postImageUrl = tmpMap.get("image_url").toString();
+                                                            Date timestamp = (Date) tmpMap.get("timestamp");
+                                                            achievement.addJournalItem(postText, postImageUrl, timestamp);
+
+                                                        }
                                                     }
                                                 } else {
 
                                                 }
+                                                threads--;
+                                                loadingTaskDone();
                                             }
                                         });
                             }
 
                         }
+
+                        threads--;
+                        loadingTaskDone();
                     }
                 });
     }
@@ -398,7 +467,8 @@ public class MainActivity extends AppCompatActivity {
         /**
          * Load name and profile picture of user
          */
-
+        threads++;
+        progress.setVisibility(View.VISIBLE);
         firebaseFirestore.collection("Users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -414,6 +484,14 @@ public class MainActivity extends AppCompatActivity {
                         AccountFragment.setUserName(name);
                         AccountFragment.setImageURL(image);
 
+                        // loaf the image and name into the drawer layout
+                        RequestOptions placeholderRequest = new RequestOptions();
+                        placeholderRequest.placeholder(R.drawable.profile_icon);
+                        Glide.with(context).setDefaultRequestOptions(placeholderRequest).load(image).into(navigationProfileImage);
+
+                        navigationProfileText.setText(name);
+
+
                     }
                 } else {
 
@@ -421,6 +499,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(mContext, "FIRESTORE retrive Error: "+errorMessage,Toast.LENGTH_LONG).show();
 
                 }
+                threads--;
+                loadingTaskDone();
 
 
             }
@@ -430,6 +510,7 @@ public class MainActivity extends AppCompatActivity {
     public  void loadAchievmentsDone(){
 
         // Load all the achievements done by user
+        accountFragment.getAchievemensDoneList().clear();
         firebaseFirestore.collection("Users/"+current_user_id+"/Achievements").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -453,6 +534,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadAllusers(){
 
+        threads++;
+        progress.setVisibility(View.VISIBLE);
+        allUsersID.clear();
         firebaseFirestore.collection("Users").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -472,60 +556,99 @@ public class MainActivity extends AppCompatActivity {
                     HomeFragment.setAllUserID(allUsersID);
                     loadPostItems();
                 }
-
+                threads--;
+                loadingTaskDone();
             }
         });
     }
 
-    private void loadPostItems(){
-        
+    public void loadPostItems(){
+
+        // clear all post items before loading all the postitems.
+        allPostItems.clear();
+        HomeFragment.clearPostItemsList();
+
+        // loop through all users and get their respective posts
         for(final User user : allUsersID) {
+
+            threads++;
+            progress.setVisibility(View.VISIBLE);
 
             firebaseFirestore.collection(user.getId()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
                     if (task.isSuccessful()) {
+
                         for (DocumentSnapshot document : task.getResult()) {
 
-                            ArrayList<Object> tmpAchievments =  (ArrayList<Object>) document.get("achievement");
 
-                            for(Object achievementName : tmpAchievments){
-                                String tmpAchievementName = (String) achievementName;
-                                firebaseFirestore.collection(user.getId()+"/"+document.getId()+"/"+tmpAchievementName)
-                                        .get()
-                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-                                                for (DocumentSnapshot document : task.getResult()) {
-                                                    Map<String, Object> tmpMap = document.getData();
-                                                    String desc = tmpMap.get("desc").toString();
-                                                    String image_thumb = tmpMap.get("image_thumb").toString();
-                                                    String postImageUrl = tmpMap.get("image_url").toString();
-                                                    Date timestamp = (Date) tmpMap.get("timestamp");
-                                                    PostItem tmpPostItem = new PostItem(user.getName(),postImageUrl,desc, image_thumb, timestamp, user.getImageUrl());
-                                                    allPostItems.add(tmpPostItem);
-                                                }
-
-                                            }
-                                        });
-
-                            }
-
+                            Map<String, Object> tmpMap = document.getData();
+                            String desc = tmpMap.get("desc").toString();
+                            String image_thumb = tmpMap.get("image_thumb").toString();
+                            String postImageUrl = tmpMap.get("image_url").toString();
+                            Date timestamp = (Date) tmpMap.get("timestamp");
+                            String topic = tmpMap.get("topic").toString();
+                            String achievement_name = tmpMap.get("achievement_name").toString();
+                            PostItem tmpPostItem = new PostItem(user.getName(),postImageUrl,desc, image_thumb, timestamp, user.getImageUrl(), user.getId(), topic, achievement_name);
+                            allPostItems.add(tmpPostItem);
+                            HomeFragment.addPostItem(tmpPostItem);
+                            homeFragment.notifyDataSetChanged();
 
                         }
 
-                        HomeFragment.setPostItems(allPostItems);
-                        homeFragment.notifyDataSetChanged();
+
 
                     }
 
-
+                 threads--;
+                    loadingTaskDone();
                 }
             });
 
         }
     }
+    public void loadNUmberOfPosts(){
+
+            threads++;
+            progress.setVisibility(View.VISIBLE);
+
+            firebaseFirestore.collection(mAuth.getUid()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                    if (task.isSuccessful())
+                        accountFragment.setNumberOFPosts(task.getResult().size());
+
+                    threads--;
+                    loadingTaskDone();
+                }
+            });
+
+    }
+
+    public void loadNumberOfFollowers(){
+
+        threads++;
+        progress.setVisibility(View.VISIBLE);
+
+        firebaseFirestore.collection("Users").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                if (task.isSuccessful())
+                    accountFragment.setNumberOfFollowers(task.getResult().size());
+
+                threads--;
+                loadingTaskDone();
+
+            }
+        });
+
+    }
+
+
+
+
 
 }

@@ -83,9 +83,17 @@ public class HomeFragment extends Fragment {
         postItems.addAll(newPostItems);
 
     }
+    public static void addPostItem(PostItem postItem){
+
+        postItems.add(postItem);
+    }
 
     public void notifyDataSetChanged(){
 
         postListAdapter.notifyDataSetChanged();
+    }
+    public static void clearPostItemsList(){
+
+        postItems.clear();
     }
 }

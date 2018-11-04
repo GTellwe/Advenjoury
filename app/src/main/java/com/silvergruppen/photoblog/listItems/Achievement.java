@@ -147,7 +147,8 @@ public class Achievement {
     }
 
     public String getPoints() {
-        return points;
+
+            return points;
     }
 
     public void setPoints(String members) {

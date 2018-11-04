@@ -134,4 +134,8 @@ public class AchievementsFragment extends Fragment {
     public void setListAchievements(ArrayList<Achievement> listAchievements) {
         this.listAchievements = listAchievements;
     }
+    public void clearAchievementList(){
+
+        listAchievements.clear();
+    }
 }

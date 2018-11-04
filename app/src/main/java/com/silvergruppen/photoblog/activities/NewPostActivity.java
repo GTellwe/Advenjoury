@@ -142,7 +142,7 @@ public class NewPostActivity extends AppCompatActivity {
                                 upploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                     @Override
                                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
+                                        /*
                                         String downloadThumbUrl = taskSnapshot.getDownloadUrl().toString();
 
                                         Map<String,Object> postMap = new HashMap<>();
@@ -167,8 +167,35 @@ public class NewPostActivity extends AppCompatActivity {
                                                 newPostProgress.setVisibility(View.INVISIBLE);
                                             }
                                         });
+                                        */
+
+                                        String downloadThumbUrl = taskSnapshot.getDownloadUrl().toString();
+
+                                        Map<String,Object> postMap = new HashMap<>();
+                                        postMap.put("image_url", downloadUri);
+                                        postMap.put("image_thumb", downloadThumbUrl);
+                                        postMap.put("desc",desc);
+                                        postMap.put("timestamp",FieldValue.serverTimestamp());
+                                        postMap.put("topic", topic);
+                                        postMap.put("achievement_name", achievement);
 
 
+                                        firebaseFirestore.collection(current_user_id).add(postMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<DocumentReference> task) {
+
+                                                if(task.isSuccessful()){
+
+                                                    Intent mainIntent = new Intent(NewPostActivity.this, MainActivity.class);
+                                                    startActivity(mainIntent);
+                                                    finish();
+
+                                                } else {
+
+                                                }
+                                                newPostProgress.setVisibility(View.INVISIBLE);
+                                            }
+                                        });
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override

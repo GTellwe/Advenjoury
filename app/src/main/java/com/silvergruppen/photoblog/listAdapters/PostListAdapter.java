@@ -2,6 +2,7 @@ package com.silvergruppen.photoblog.listAdapters;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.Image;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.silvergruppen.photoblog.ListViewHolders.PostListViewHolder;
 import com.silvergruppen.photoblog.R;
+import com.silvergruppen.photoblog.activities.DispayUserProfileActivity;
 import com.silvergruppen.photoblog.listItems.PostItem;
 
 import java.util.ArrayList;
@@ -63,6 +65,16 @@ public class PostListAdapter extends ArrayAdapter<PostItem> {
 
             TextView desc = (TextView) convertView.findViewById(R.id.post_item_desc);
 
+            usernameText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    Intent displayAccountIntent = new Intent(context, DispayUserProfileActivity.class);
+                    displayAccountIntent.putExtra("user_id",postItem.getUser_id());
+                    context.startActivity(displayAccountIntent);
+                }
+            });
+
 
             holder = new PostListViewHolder(textViewWrap, usernameText,dateText,profileImage, image, desc);
 
@@ -84,7 +96,7 @@ public class PostListAdapter extends ArrayAdapter<PostItem> {
         // set the user image
         Glide.with(context).load(postItem.getUser_image_url()).into(holder.getUserImage());
         // set the username
-        holder.getUsernameText().setText(postItem.getUser_id());
+        holder.getUsernameText().setText(postItem.getUserName());
         // set the description
         holder.getDescTextView().setText(postItem.getDesc());
 

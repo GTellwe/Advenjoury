@@ -31,6 +31,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.silvergruppen.photoblog.ListViewHolders.AchievementListViewHolder;
 import com.silvergruppen.photoblog.R;
+import com.silvergruppen.photoblog.activities.DispayUserProfileActivity;
 import com.silvergruppen.photoblog.activities.MainActivity;
 import com.silvergruppen.photoblog.activities.NewPostActivity;
 import com.silvergruppen.photoblog.animations.ResizeAnimation;
@@ -50,6 +51,7 @@ public class AchievementListAdapter extends ArrayAdapter<Achievement> {
     private String user_id;
     private String topic;
     private boolean editable;
+    private MainActivity mainActivity;
 
     public AchievementListAdapter(Context context, int textViewResourceId,
                                   ArrayList<Achievement> achievementItems, String topic, boolean editable) {
@@ -61,6 +63,9 @@ public class AchievementListAdapter extends ArrayAdapter<Achievement> {
         user_id = firebaseAuth.getCurrentUser().getUid();
         this.topic = topic;
         this.editable = editable;
+        if(context.getClass() == MainActivity.class)
+            mainActivity = (MainActivity) context;
+
 
     }
 
@@ -86,6 +91,8 @@ public class AchievementListAdapter extends ArrayAdapter<Achievement> {
             Button markAsDone = convertView.findViewById(R.id.achievement_list_item_done_button);
 
             ImageView checkImage = convertView.findViewById(R.id.image_view_check_mark);
+
+            TextView pointsText = convertView.findViewById(R.id.pointsText);
 
             // if the list is not editable then hide the add and remove post buttons
 
@@ -163,7 +170,7 @@ public class AchievementListAdapter extends ArrayAdapter<Achievement> {
                 }
             });
 
-            holder = new AchievementListViewHolder(textViewWrap, text,addPostBtn,journalItems,markAsDone,checkImage, context);
+            holder = new AchievementListViewHolder(textViewWrap, text,addPostBtn,journalItems,markAsDone,checkImage, context, pointsText);
 
             // set listener to the list items
             convertView.setClickable(true);
@@ -189,6 +196,7 @@ public class AchievementListAdapter extends ArrayAdapter<Achievement> {
                 achievementItem.getCurrentHeight());
         holder.getTextViewWrap().setLayoutParams(layoutParams);
         holder.getTextView().setText(achievementItem.getName());
+        holder.getPointsText().setText(achievementItem.getPoints());
         // check if the checkmark should be present
         if(achievementItem.isDone())
             holder.setChecImageVisibility(View.VISIBLE);
@@ -229,7 +237,7 @@ public class AchievementListAdapter extends ArrayAdapter<Achievement> {
                 tmpImageView.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(final View view) {
-                        firebaseFirestore.collection(user_id+"/"+achievementItem.getTopic()+"/"+achievementItem.getName())
+                        firebaseFirestore.collection(user_id)
                                 .get()
                                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                     @Override
@@ -239,14 +247,18 @@ public class AchievementListAdapter extends ArrayAdapter<Achievement> {
                                                 Map<String,Object> tmpMap = document.getData();
                                                 if(tmpMap.get("timestamp").equals(achievementItem.getBlogListViewHasMap().get(view))) {
                                                     // Delete document from firebase
-                                                    firebaseFirestore.collection(user_id+"/"+achievementItem.getTopic()+"/"+achievementItem.getName())
+                                                    firebaseFirestore.collection(user_id)
                                                             .document(document.getId())
                                                             .delete()
                                                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                                 @Override
                                                                 public void onSuccess(Void aVoid) {
                                                                     Toast.makeText(context,"Removing post",Toast.LENGTH_LONG).show();
-                                                                    notifyDataSetChanged();
+                                                                    //notifyDataSetChanged();
+
+                                                                    mainActivity.loadAchievements();
+                                                                    mainActivity.loadPostItems();
+
                                                                 }
                                                             });
 
@@ -271,8 +283,9 @@ public class AchievementListAdapter extends ArrayAdapter<Achievement> {
                 tmpTextView.setText(tmpPost.getText());
 
                 android.widget.LinearLayout.LayoutParams paramsTextView =new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                paramsTextView.gravity = Gravity.CENTER;
                 tmpTextView.setLayoutParams(paramsTextView);
-                tmpTextView.setGravity(Gravity.CENTER);
+                tmpTextView.setGravity(Gravity.CENTER_HORIZONTAL);
                 holder.getJournalItems().addView(tmpTextView);
 
 
