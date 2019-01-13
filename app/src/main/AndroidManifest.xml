@@ -35,7 +35,8 @@
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
         <activity android:name=".activities.NewPostActivity" />
-        <activity android:name=".activities.SearchActivity"
+        <activity
+            android:name=".activities.SearchActivity"
             android:parentActivityName=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -46,7 +47,13 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity android:name=".activities.DispayUserProfileActivity" />
-        <activity android:name=".activities.InitialDataLoadActivity"></activity>
+        <activity android:name=".activities.InitialDataLoadActivity" />
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+
+        <activity android:name=".fragments.AccountFragment$AchievementActivity"></activity>
     </application>
 
 </manifest>

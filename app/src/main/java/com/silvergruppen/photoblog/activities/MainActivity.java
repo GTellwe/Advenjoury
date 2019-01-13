@@ -5,16 +5,13 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
@@ -24,24 +21,30 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.silvergruppen.photoblog.R;
 import com.silvergruppen.photoblog.fragments.AccountFragment;
+import com.silvergruppen.photoblog.fragments.AchievementFragment;
+import com.silvergruppen.photoblog.fragments.AchievementsFragment2;
+import com.silvergruppen.photoblog.fragments.CatagoriesFragment;
+import com.silvergruppen.photoblog.fragments.CalendarFragment;
+import com.silvergruppen.photoblog.fragments.DailyProgressFragment;
 import com.silvergruppen.photoblog.fragments.HomeFragment;
-import com.silvergruppen.photoblog.fragments.AchievementsFragment;
-import com.silvergruppen.photoblog.listItems.Achievement;
-import com.silvergruppen.photoblog.listItems.PostItem;
+import com.silvergruppen.photoblog.items.Achievement;
+import com.silvergruppen.photoblog.items.Catagorie;
+import com.silvergruppen.photoblog.items.PostItem;
 import com.silvergruppen.photoblog.other.User;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Toolbar mainToolbar;
     private ProgressBar progress;
-    private NavigationView navView;
+    //private NavigationView navView;
     private FirebaseAuth mAuth;
     private FirebaseFirestore firebaseFirestore;
 
@@ -62,8 +65,12 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView mainBottomNav;
 
     private HomeFragment homeFragment;
-    private AchievementsFragment achievementsFragment;
+    private AchievementsFragment2 achievementsFragment;
     private AccountFragment accountFragment;
+    private CalendarFragment calendarFragment;
+    private CatagoriesFragment catagoriesFragment;
+    private AchievementFragment achievementFragment;
+    private DailyProgressFragment dailyProgressFragment;
     private String topic, currentAchievement;
 
     private DrawerLayout mainDrawerLayout;
@@ -79,9 +86,15 @@ public class MainActivity extends AppCompatActivity {
     private TextView navigationProfileText;
     private CircleImageView navigationProfileImage;
 
+    private TextView mainToolbarHeadline;
+
     public static int threads;
 
     private Context context;
+
+    private HashMap<Calendar,ArrayList<Integer>> dailyProgressHashMap = new HashMap<Calendar, ArrayList<Integer>>();
+    private String currentUserImageUrl;
+
 
 
 
@@ -102,29 +115,39 @@ public class MainActivity extends AppCompatActivity {
         allUsersID = new ArrayList<>();
         // Initialize fragments
         homeFragment = new HomeFragment();
-        achievementsFragment = new AchievementsFragment();
+        achievementsFragment = new AchievementsFragment2();
         accountFragment = new AccountFragment();
+        calendarFragment = new CalendarFragment();
+        catagoriesFragment = new CatagoriesFragment();
+        achievementFragment = new AchievementFragment();
+        dailyProgressFragment = new DailyProgressFragment();
 
         accountFragment.setAchievemensDoneList(new ArrayList<Achievement>());
-        achievementsFragment.setListAchievements(new ArrayList<Achievement>());
 
 
 
         mainDrawerLayout = findViewById(R.id.main_drawer_layout);
-        navView = mainDrawerLayout.findViewById(R.id.nav_view);
-        View navHead = navView.getHeaderView(0);
-        navigationProfileImage = navHead.findViewById(R.id.nav_profile_image);
-        navigationProfileText = navHead.findViewById(R.id.nav_profile_text);
+        //navView = mainDrawerLayout.findViewById(R.id.nav_view);
+        //View navHead = navView.getHeaderView(0);
+        //navigationProfileImage = navHead.findViewById(R.id.nav_profile_image);
+        //navigationProfileText = navHead.findViewById(R.id.nav_profile_text);
 
         mainToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(mainToolbar);
         getSupportActionBar().setTitle(null);
 
+        mainToolbarHeadline = findViewById(R.id.main_toolbar_headline);
+        mainToolbarHeadline.setText("HOME");
+
+
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
 
+        // create the list of daily achievements
 
 
+
+/*
         navView = findViewById(R.id.nav_view);
 
         if(mAuth.getCurrentUser() != null) {
@@ -146,14 +169,14 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
-
+*/
 
             mainBottomNav = findViewById(R.id.main_bottom_nav);
 
             //fragments
 
             replaceFragment(homeFragment);
-
+/*
             // Create the on navigationView Item listener
             navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
                 @Override
@@ -165,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-
+*/
 
             mainBottomNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
@@ -177,10 +200,14 @@ public class MainActivity extends AppCompatActivity {
                             replaceFragment(homeFragment);
                             return true;
                         case R.id.bottom_action_achievement:
-                            replaceFragment(achievementsFragment);
+                            replaceFragment(catagoriesFragment);
                             return true;
                         case R.id.bottom_action_account:
                             replaceFragment(accountFragment);
+                            return true;
+                        case R.id.bottom_action_daily_progress:
+                            mainToolbarHeadline.setText("CALENDAR");
+                            replaceFragment(calendarFragment);
                             return true;
                         case R.id.bottom_action_search:
                             Intent searchIntent = new Intent(MainActivity.this, SearchActivity.class);
@@ -195,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        }
+       // }
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if(currentUser == null){
@@ -253,9 +280,10 @@ public class MainActivity extends AppCompatActivity {
             final View iconView = menuView.getChildAt(i).findViewById(android.support.design.R.id.icon);
             final ViewGroup.LayoutParams layoutParams = iconView.getLayoutParams();
             final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-            layoutParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14, displayMetrics);
-            layoutParams.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14, displayMetrics);
+            layoutParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, displayMetrics);
+            layoutParams.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, displayMetrics);
             iconView.setLayoutParams(layoutParams);
+
         }
     }
 
@@ -291,6 +319,58 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public String getCurrentUserImageUrl(){
+
+        return currentUserImageUrl;
+
+    }
+
+
+    public HashMap<Calendar, ArrayList<Integer>> getDailyProgressHashMap() {
+        return dailyProgressHashMap;
+    }
+
+    public void setDailyProgressHashMap(HashMap<Calendar, ArrayList<Integer>> dailyProgressHashMap) {
+        this.dailyProgressHashMap = dailyProgressHashMap;
+    }
+
+    public void startDailyProgressFragment(Calendar calendar){
+
+        dailyProgressFragment.setCalendar(calendar);
+        replaceFragment(dailyProgressFragment);
+    }
+    public void startAchievementFragment(Catagorie catagorie){
+
+
+        mainToolbarHeadline.setText(catagorie.getName().toUpperCase());
+        achievementsFragment.setCurrentCatagorie(catagorie);
+        replaceFragment(achievementsFragment);
+    }
+
+    public void setHeadline(String headline){
+
+        mainToolbarHeadline.setText(headline);
+    }
+
+    public void startAchievementActivity(Achievement achievement){
+
+        // clear all journal items
+        achievementFragment.clearAllJournalItems();
+        achievementFragment.setAchievement(achievement);
+
+        // Load all post items into the jorunal
+        for(PostItem tmpPostItem : allPostItems){
+
+            if(tmpPostItem.achievementName.equals(achievement.getName()) && tmpPostItem.getUser_id().equals(current_user_id)){
+
+                achievementFragment.addJournalItem(tmpPostItem);
+            }
+
+        }
+       replaceFragment(achievementFragment);
+        // Intent achievementIntent = new Intent(MainActivity.this, AchievementActivity.class);
+        //startActivity(achievementIntent);
+    }
     public void loadAllUserData(){
 
         loadAchievements();
@@ -298,6 +378,7 @@ public class MainActivity extends AppCompatActivity {
         loadAllusers();
         loadNUmberOfPosts();
         loadNumberOfFollowers();
+        loadCatagories();
 
     }
     private void logOut(){
@@ -312,8 +393,8 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
-    private void replaceFragment(Fragment fragment){
-
+    public void replaceFragment(Fragment fragment){
+/*
         if(!fragment.equals(achievementsFragment))
             mainDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         else {
@@ -321,7 +402,7 @@ public class MainActivity extends AppCompatActivity {
             mainDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
             mainDrawerLayout.openDrawer(Gravity.LEFT);
         }
-
+*/
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.main_container, fragment);
         fragmentTransaction.commit();
@@ -439,7 +520,9 @@ public class MainActivity extends AppCompatActivity {
 
                                                         if(tmpTopic.equals(achievement.getTopic()) && achievementName.equals(achievement.getName())) {
                                                             String postText = tmpMap.get("desc").toString();
-                                                            String postImageUrl = tmpMap.get("image_url").toString();
+                                                            String postImageUrl = null;
+                                                            if(tmpMap.get("image_url") != null)
+                                                                postImageUrl = tmpMap.get("image_url").toString();
                                                             Date timestamp = (Date) tmpMap.get("timestamp");
                                                             achievement.addJournalItem(postText, postImageUrl, timestamp);
 
@@ -483,14 +566,15 @@ public class MainActivity extends AppCompatActivity {
 
                         AccountFragment.setUserName(name);
                         AccountFragment.setImageURL(image);
+                        currentUserImageUrl = image;
 
                         // loaf the image and name into the drawer layout
-                        RequestOptions placeholderRequest = new RequestOptions();
+                       /* RequestOptions placeholderRequest = new RequestOptions();
                         placeholderRequest.placeholder(R.drawable.profile_icon);
                         Glide.with(context).setDefaultRequestOptions(placeholderRequest).load(image).into(navigationProfileImage);
 
                         navigationProfileText.setText(name);
-
+*/
 
                     }
                 } else {
@@ -585,15 +669,23 @@ public class MainActivity extends AppCompatActivity {
 
                             Map<String, Object> tmpMap = document.getData();
                             String desc = tmpMap.get("desc").toString();
-                            String image_thumb = tmpMap.get("image_thumb").toString();
-                            String postImageUrl = tmpMap.get("image_url").toString();
+
+                            String image_thumb = null;
+                            if(tmpMap.get("image_thumb") != null)
+                                image_thumb = tmpMap.get("image_thumb").toString();
+                            //Log.d("\n \n \n \n \n", tmpMap.get("image_thumb").toString());
+
+                            String postImageUrl = null;
+                            if(tmpMap.get("image_url") != null)
+                                postImageUrl = tmpMap.get("image_url").toString();
+
                             Date timestamp = (Date) tmpMap.get("timestamp");
                             String topic = tmpMap.get("topic").toString();
                             String achievement_name = tmpMap.get("achievement_name").toString();
-                            PostItem tmpPostItem = new PostItem(user.getName(),postImageUrl,desc, image_thumb, timestamp, user.getImageUrl(), user.getId(), topic, achievement_name);
+                            String headline = "Added new post on achievement \""+ achievement_name+"\"";
+                            PostItem tmpPostItem = new PostItem(user.getName(),postImageUrl,desc, image_thumb, timestamp, user.getImageUrl(), user.getId(), topic, achievement_name, headline);
                             allPostItems.add(tmpPostItem);
                             HomeFragment.addPostItem(tmpPostItem);
-                            homeFragment.notifyDataSetChanged();
 
                         }
 
@@ -644,6 +736,84 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+    }
+
+    private void loadCatagories(){
+
+        //Get the topics from Firebase and show in nav view
+        firebaseFirestore.collection("Topics")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                catagoriesFragment.addCatagorie(new Catagorie(document.getId()));
+                            }
+                        } else {
+
+                        }
+                    }
+                });
+    }
+
+    public void setAchievementDoneInfireBase(Boolean done, final Achievement achievementItem){
+
+
+        final String currentUserID= mAuth.getCurrentUser().getUid();
+        firebaseFirestore = FirebaseFirestore.getInstance();
+        // if the achievement is not done by the current user then add the user name to the achievments list of
+        // users otherwise remove it
+        threads++;
+        progress.setVisibility(View.VISIBLE);
+        if(done){
+
+            final HashMap<String, Object> tmpHashMap = new HashMap<>();
+            tmpHashMap.put("timestamp", FieldValue.serverTimestamp());
+
+            firebaseFirestore.collection("Achievements/"+achievementItem.getName()+"/Users").document(currentUserID).set(tmpHashMap)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            // add to Users/achievments as well
+                            firebaseFirestore.collection("Users/"+currentUserID+"/Achievements").document(achievementItem.getName()).set(tmpHashMap)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+
+                                            Toast.makeText(context,"Achievement marked as done",Toast.LENGTH_LONG).show();
+                                            achievementItem.setDone(true);
+                                        }
+                                    });
+                            threads--;
+                            loadingTaskDone();
+                        }
+
+                    });
+
+        } else {
+
+            firebaseFirestore.collection("Achievements/"+achievementItem.getName()+"/Users").document(currentUserID).delete()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            firebaseFirestore.collection("Users/"+currentUserID+"/Achievements").document(achievementItem.getName()).delete()
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Toast.makeText(context,"Achievement marked as not done",Toast.LENGTH_LONG).show();
+                                            achievementItem.setDone(false);
+                                        }
+                                    });
+                            threads--;
+                            loadingTaskDone();
+
+                        }
+                    });
+
+
+        }
 
     }
 

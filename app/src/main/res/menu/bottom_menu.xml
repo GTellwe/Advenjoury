@@ -5,18 +5,22 @@
 
     <item
         android:id="@+id/bottom_action_home"
-        android:icon="@mipmap/icon_feed"
+        android:icon="@drawable/earthglobe"
         android:title="" />
     <item
         android:id="@+id/bottom_action_achievement"
-        android:icon="@mipmap/icon_earth"
+        android:icon="@drawable/trophy"
+        android:title="" />
+    <item
+        android:id="@+id/bottom_action_daily_progress"
+        android:icon="@drawable/calendar"
         android:title="" />
     <item
         android:id="@+id/bottom_action_account"
-        android:icon="@mipmap/icon_profile"
+        android:icon="@drawable/user"
         android:title="" />
     <item
         android:id="@+id/bottom_action_search"
-        android:icon="@mipmap/icon_search"
+        android:icon="@drawable/search"
         android:title="" />
 </menu>

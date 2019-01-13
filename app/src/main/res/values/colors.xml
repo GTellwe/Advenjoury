@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#ffffbe</color>
-    <color name="colorPrimaryDark">#ffc666</color>
+    <color name="colorPrimary">#4ec9c4</color>
+    <color name="colorPrimaryDark">#4EC9C4</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="colorMain">#ffc666</color>
+    <color name="colorMain">#4f4f4f</color>
     <color name="colorIconGrey">#353535</color>
     <color name="colorMainGrey">#4f4f4f</color>
     <color name="colorMainWhite">#ffffff</color>
+    <color name="colorUnderlineSignIn">#e6e6e6</color>
+    <color name="colorGrey2">#a7a7a7</color>
+    <color name="colorBlack">#000000</color>
+    <color name="dividerColor">#707070</color>
 </resources>

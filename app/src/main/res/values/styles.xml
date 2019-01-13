@@ -6,6 +6,23 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="coordinatorLayoutStyle">@style/Widget.Support.CoordinatorLayout</item>
+
     </style>
 
+    <style name="ToolbarTheme" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        <!-- android:textColorPrimary is the color of the title text in the Toolbar  -->
+        <item name="android:textColorPrimary">@color/colorMainWhite</item>
+        <!-- actionMenuTextColor is the color of the text of action (menu) items  -->
+    </style>
+
+    <style name="Toolbar.TitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name= "android:fontFamily">@font/montserrat</item>
+        <item name="android:textSize">12sp</item>
+
+    </style>
+
+    <style name="SwitchCompatTheme" >
+        <item name="colorControlActivated">#92D980</item>
+    </style>
 </resources>

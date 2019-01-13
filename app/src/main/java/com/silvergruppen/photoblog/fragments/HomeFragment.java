@@ -2,26 +2,21 @@ package com.silvergruppen.photoblog.fragments;
 
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.silvergruppen.photoblog.listAdapters.AchievementListAdapter;
-import com.silvergruppen.photoblog.listAdapters.PostListAdapter;
-import com.silvergruppen.photoblog.listItems.PostItem;
+import com.silvergruppen.photoblog.adapters.PostListAdapter;
+import com.silvergruppen.photoblog.items.PostItem;
 import com.silvergruppen.photoblog.R;
 import com.silvergruppen.photoblog.other.User;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
 
 
 /**
@@ -33,14 +28,17 @@ public class HomeFragment extends Fragment {
     private static ArrayList<User> allUserID;
 
     private ListView homeListView;
+    private static SortbyDate comparator;
 
-    private PostListAdapter postListAdapter;
+    private static PostListAdapter postListAdapter;
 
     FirebaseFirestore firebaseFirestore;
     public HomeFragment() {
 
         allUserID = new ArrayList<>();
         postItems = new ArrayList<>();
+        comparator = new SortbyDate();
+
 
     }
 
@@ -53,7 +51,8 @@ public class HomeFragment extends Fragment {
         // setup the list view
         homeListView = view.findViewById(R.id.home_list_view);
         homeListView.setItemsCanFocus(true);
-        postListAdapter = new PostListAdapter(getActivity(), R.layout.post_list_item, postItems);
+        postListAdapter = new PostListAdapter(getActivity(), postItems);
+
         homeListView.setAdapter(postListAdapter);
         homeListView.setItemsCanFocus(true);
 
@@ -84,8 +83,11 @@ public class HomeFragment extends Fragment {
 
     }
     public static void addPostItem(PostItem postItem){
-
+        // Post items choudl be added in the correct order
         postItems.add(postItem);
+        Collections.sort(postItems, comparator);
+        postListAdapter.clonePostList(postItems);
+        postListAdapter.notifyDataSetChanged();
     }
 
     public void notifyDataSetChanged(){
@@ -95,5 +97,15 @@ public class HomeFragment extends Fragment {
     public static void clearPostItemsList(){
 
         postItems.clear();
+    }
+
+    // comparator for sorting the post items after date
+    private class SortbyDate implements Comparator<PostItem>
+    {
+
+        public int compare(PostItem a, PostItem b)
+        {
+            return b.getTimeStamp().compareTo(a.getTimeStamp());
+        }
     }
 }

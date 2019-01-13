@@ -2,36 +2,21 @@ package com.silvergruppen.photoblog.fragments;
 
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.silvergruppen.photoblog.R;
-import com.silvergruppen.photoblog.activities.MainActivity;
-import com.silvergruppen.photoblog.animations.ResizeAnimation;
-import com.silvergruppen.photoblog.listAdapters.AchievementListAdapter;
-import com.silvergruppen.photoblog.listItems.Achievement;
+import com.silvergruppen.photoblog.adapters.AchievementListAdapter;
+import com.silvergruppen.photoblog.items.Achievement;
 
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 
 /**

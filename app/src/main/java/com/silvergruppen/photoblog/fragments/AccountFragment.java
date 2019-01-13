@@ -1,9 +1,15 @@
 package com.silvergruppen.photoblog.fragments;
 
 
-import android.content.Context;
+import android.app.Activity;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,17 +17,17 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.silvergruppen.photoblog.R;
-import com.silvergruppen.photoblog.listAdapters.AchievementListAdapter;
-import com.silvergruppen.photoblog.listItems.Achievement;
+import com.silvergruppen.photoblog.adapters.AchievementListAdapter;
+import com.silvergruppen.photoblog.items.Achievement;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -99,21 +105,11 @@ public class AccountFragment extends Fragment {
         followersTextView = view.findViewById(R.id.account_followers_text_view);
         followersTextView.setText(Integer.toString(numberOfFollowers));
 
-        // set the level
-        levelTextView =  view.findViewById(R.id.level_text);
-        levelTextView.setText("Level "+Integer.toString(convertPointsToLevel()));
+
 
         // set the progress
         levelProgress = view.findViewById(R.id.account_progress);
         levelProgress.setProgress(getLevelProgress());
-
-        // Set up the list view
-
-        accountListView = view.findViewById(R.id.account_list_view);
-        accountListView.setItemsCanFocus(true);
-        achievementListAdapter= new AchievementListAdapter(getActivity(), R.layout.achievement_list_item, achievemensDoneList,null, false);
-        accountListView.setAdapter(achievementListAdapter);
-        accountListView.setItemsCanFocus(true);
 
         return view;
     }
@@ -199,4 +195,6 @@ public class AccountFragment extends Fragment {
     public int getNumberOfPoints() {
         return numberOfPoints;
     }
+
+
 }

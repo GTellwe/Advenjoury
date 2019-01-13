@@ -10,20 +10,17 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.silvergruppen.photoblog.R;
-import com.silvergruppen.photoblog.listAdapters.SearchListAdapter;
-import com.silvergruppen.photoblog.listItems.SearchItem;
+import com.silvergruppen.photoblog.adapters.SearchListAdapter;
+import com.silvergruppen.photoblog.items.SearchItem;
 
 import java.util.ArrayList;
 import java.util.Map;
