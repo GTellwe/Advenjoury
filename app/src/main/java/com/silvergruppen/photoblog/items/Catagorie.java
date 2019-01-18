@@ -5,9 +5,11 @@ import com.silvergruppen.photoblog.holders.CatagoriesListViewHolder;
 public class Catagorie extends RecycleListItem {
 
     CatagoriesListViewHolder holder;
+    int numberOfAchievments, achievementsDoneByCurrentUser;
 
-    public Catagorie(String name){
+    public Catagorie(String name, int numberOfAchievments){
         super(name);
+        this.numberOfAchievments = numberOfAchievments;
 
 
     }
@@ -20,4 +22,19 @@ public class Catagorie extends RecycleListItem {
         this.holder = holder;
     }
 
+    public int getNumberOfAchievments() {
+        return numberOfAchievments;
+    }
+
+    public void setNumberOfAchievments(int numberOfAchievments) {
+        this.numberOfAchievments = numberOfAchievments;
+    }
+
+    public int getAchievementsDoneByCurrentUser() {
+        return achievementsDoneByCurrentUser;
+    }
+
+    public void setAchievementsDoneByCurrentUser(int achievementsDoneByCurrentUser) {
+        this.achievementsDoneByCurrentUser = achievementsDoneByCurrentUser;
+    }
 }

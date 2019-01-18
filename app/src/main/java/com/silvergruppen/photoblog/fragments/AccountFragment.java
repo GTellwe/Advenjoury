@@ -35,6 +35,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 /**
  * A simple {@link Fragment} subclass.
  */
+
 public class AccountFragment extends Fragment {
 
     private TextView accountName, levelTextView, achievementsDoneTextView, postsTextView, followersTextView;
@@ -104,8 +105,6 @@ public class AccountFragment extends Fragment {
         // set the number of followers text
         followersTextView = view.findViewById(R.id.account_followers_text_view);
         followersTextView.setText(Integer.toString(numberOfFollowers));
-
-
 
         // set the progress
         levelProgress = view.findViewById(R.id.account_progress);

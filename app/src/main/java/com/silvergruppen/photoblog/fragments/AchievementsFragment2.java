@@ -34,6 +34,8 @@ public class AchievementsFragment2 extends Fragment {
 
     public RecyclerView achievementsRecyclerView;
 
+    private ArrayList<Achievement> achievementsList;
+
 
     public ArrayList<RecycleListItem> listAchievements;
 
@@ -51,6 +53,7 @@ public class AchievementsFragment2 extends Fragment {
     private String imageURL;
     private MainActivity mainActivity;
     private  final String headline = "ACIEVEMENTS";
+    private TextView progressTextView;
 
 
     private TextView titleTextView;
@@ -104,6 +107,12 @@ public class AchievementsFragment2 extends Fragment {
         catagoriesListAdapter = new RecycleViewAdapter(getActivity(), getListOfAchievementsInCatagorie(currentCatagorie));
         achievementsRecyclerView.setAdapter(catagoriesListAdapter);
         catagoriesListAdapter.notifyDataSetChanged();
+
+        // set the text of the progress text view
+        progressTextView = view.findViewById(R.id.achievements_progres_text_view);
+
+        if(currentCatagorie != null)
+            progressTextView.setText(Integer.toString(mainActivity.getAchievementsDoneByCurrentUser(currentCatagorie))+"/"+Integer.toString(currentCatagorie.getNumberOfAchievments()));
         return view;
     }
 

@@ -94,7 +94,7 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
 
     @Override
     public int getItemCount() {
-        Log.d("\n \n \n \n \n catagorie", Integer.toString(catagoriesItems.size()));
+
         return catagoriesItems.size();
 
     }

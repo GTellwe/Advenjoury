@@ -2,15 +2,20 @@ package com.silvergruppen.photoblog.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,18 +35,24 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.silvergruppen.photoblog.R;
 import com.silvergruppen.photoblog.fragments.AccountFragment;
+import com.silvergruppen.photoblog.fragments.AccountSettingsFragment;
 import com.silvergruppen.photoblog.fragments.AchievementFragment;
 import com.silvergruppen.photoblog.fragments.AchievementsFragment2;
 import com.silvergruppen.photoblog.fragments.CatagoriesFragment;
 import com.silvergruppen.photoblog.fragments.CalendarFragment;
 import com.silvergruppen.photoblog.fragments.DailyProgressFragment;
 import com.silvergruppen.photoblog.fragments.HomeFragment;
+import com.silvergruppen.photoblog.fragments.SearchFragment;
 import com.silvergruppen.photoblog.items.Achievement;
 import com.silvergruppen.photoblog.items.Catagorie;
 import com.silvergruppen.photoblog.items.PostItem;
 import com.silvergruppen.photoblog.other.User;
+import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -64,6 +75,12 @@ public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView mainBottomNav;
 
+    private StorageReference storageReference;
+
+    private static FragmentManager supportFrameManager;
+
+
+    // fragments
     private HomeFragment homeFragment;
     private AchievementsFragment2 achievementsFragment;
     private AccountFragment accountFragment;
@@ -71,6 +88,9 @@ public class MainActivity extends AppCompatActivity {
     private CatagoriesFragment catagoriesFragment;
     private AchievementFragment achievementFragment;
     private DailyProgressFragment dailyProgressFragment;
+    private AccountSettingsFragment accountSettingsFragment;
+
+
     private String topic, currentAchievement;
 
     private DrawerLayout mainDrawerLayout;
@@ -95,11 +115,14 @@ public class MainActivity extends AppCompatActivity {
     private HashMap<Calendar,ArrayList<Integer>> dailyProgressHashMap = new HashMap<Calendar, ArrayList<Integer>>();
     private String currentUserImageUrl;
 
-
+    private Uri accountImageUri;
 
 
     private Context mContext;
 
+    public static final int accountFragmentId = 0,calendarFragmentId=2, catogiresFragmentId = 1, homefragmentId=3;
+
+    public static int displayFramentOnResume = homefragmentId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,6 +144,8 @@ public class MainActivity extends AppCompatActivity {
         catagoriesFragment = new CatagoriesFragment();
         achievementFragment = new AchievementFragment();
         dailyProgressFragment = new DailyProgressFragment();
+        accountSettingsFragment = new AccountSettingsFragment();
+
 
         accountFragment.setAchievemensDoneList(new ArrayList<Achievement>());
 
@@ -142,6 +167,9 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
+        storageReference = FirebaseStorage.getInstance().getReference();
+
+        supportFrameManager = getSupportFragmentManager();
 
         // create the list of daily achievements
 
@@ -175,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
 
             //fragments
 
-            replaceFragment(homeFragment);
+            replaceFragment(displayFramentOnResume);
 /*
             // Create the on navigationView Item listener
             navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -210,8 +238,10 @@ public class MainActivity extends AppCompatActivity {
                             replaceFragment(calendarFragment);
                             return true;
                         case R.id.bottom_action_search:
+
                             Intent searchIntent = new Intent(MainActivity.this, SearchActivity.class);
                             startActivity(searchIntent);
+
                         default:
                             return false;
 
@@ -242,6 +272,9 @@ public class MainActivity extends AppCompatActivity {
 
                         if(!task.getResult().exists()){
 
+
+                            //replaceFragment(accountSettingsFragment);
+
                             Intent setupIntent = new Intent(MainActivity.this, SetupActivity.class);
                             startActivity(setupIntent);
                             finish();
@@ -263,12 +296,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     @Override
     protected void onStart() {
+        replaceFragment(displayFramentOnResume);
+        Toast.makeText(this,"start", Toast.LENGTH_LONG).show();
         super.onStart();
 
 
     }
+
+
 
     private void changeBottomMenuIconSize() {
 
@@ -308,15 +346,55 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.action_setting_btn:
 
+                replaceFragment(accountSettingsFragment);
+                /*
                 Intent settingsIntent = new Intent(MainActivity.this, SetupActivity.class);
                 startActivity(settingsIntent);
-
+                */
                 return true;
 
                 default:
                     return false;
         }
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+
+            if (resultCode == RESULT_OK) {
+
+                accountImageUri = result.getUri();
+                accountSettingsFragment.setImageUri(accountImageUri);
+                //setupImage.setImageURI(mainImageUri);
+
+                accountSettingsFragment.setSettupChanged(true);
+                //isChanged = true;
+
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+
+                Exception error = result.getError();
+
+            }
+        }
+    }
+
+    public int getAchievementsDoneByCurrentUser(Catagorie catagorie){
+
+        int achievementsDone = 0;
+        for(Achievement achievement : achievementsList){
+
+            if(achievement.isDone() && achievement.getCatagorie().equals(catagorie.getName())){
+                achievementsDone ++;
+            }
+        }
+
+        return achievementsDone;
     }
 
     public String getCurrentUserImageUrl(){
@@ -358,6 +436,9 @@ public class MainActivity extends AppCompatActivity {
         achievementFragment.clearAllJournalItems();
         achievementFragment.setAchievement(achievement);
 
+        setHeadline(achievement.getName());
+
+
         // Load all post items into the jorunal
         for(PostItem tmpPostItem : allPostItems){
 
@@ -369,6 +450,7 @@ public class MainActivity extends AppCompatActivity {
         }
        replaceFragment(achievementFragment);
         // Intent achievementIntent = new Intent(MainActivity.this, AchievementActivity.class);
+        //startActivity(achievementIntent);
         //startActivity(achievementIntent);
     }
     public void loadAllUserData(){
@@ -393,6 +475,7 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+
     public void replaceFragment(Fragment fragment){
 /*
         if(!fragment.equals(achievementsFragment))
@@ -403,9 +486,30 @@ public class MainActivity extends AppCompatActivity {
             mainDrawerLayout.openDrawer(Gravity.LEFT);
         }
 */
+
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.main_container, fragment);
         fragmentTransaction.commit();
+
+    }
+
+    public void replaceFragment(int fragmentId){
+
+        switch (fragmentId){
+
+            case accountFragmentId:
+                replaceFragment(accountFragment);
+            case homefragmentId:
+                replaceFragment(homeFragment);
+            case catogiresFragmentId:
+                replaceFragment(catagoriesFragment);
+            case calendarFragmentId:
+                replaceFragment(calendarFragment);
+                default:
+
+        }
+
+
 
     }
     private void refreshFragment(Fragment fragment){
@@ -463,9 +567,10 @@ public class MainActivity extends AppCompatActivity {
 
 
                                 final String name = tmpMap.get("name").toString();
+                                final String catagorie = tmpMap.get("topic").toString();
                                 // check if user has done achievement
 
-                                Achievement tmpAchievement =new Achievement(name, tmpMap.get("topic").toString(), tmpMap.get("points").toString(),false);
+                                Achievement tmpAchievement = new Achievement(name, tmpMap.get("topic").toString(), tmpMap.get("points").toString(),false, catagorie);
                                 achievementsList.add(tmpAchievement);
                                 achievementsFragment.addAchievement(tmpAchievement);
                                 achievementHashmap.put(name,tmpAchievement);
@@ -566,6 +671,8 @@ public class MainActivity extends AppCompatActivity {
 
                         AccountFragment.setUserName(name);
                         AccountFragment.setImageURL(image);
+                        accountSettingsFragment.setImageURL(image);
+                        accountSettingsFragment.setUserName(name);
                         currentUserImageUrl = image;
 
                         // loaf the image and name into the drawer layout
@@ -749,7 +856,23 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (DocumentSnapshot document : task.getResult()) {
-                                catagoriesFragment.addCatagorie(new Catagorie(document.getId()));
+
+                                final String catagorieName = document.getId();
+                                firebaseFirestore.collection("Topics").document(document.getId()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                                        if(task.getResult().exists()){
+
+                                            Map<String, Object> tmpMap = task.getResult().getData();
+                                            int members = Integer.parseInt(tmpMap.get("members").toString());
+                                            catagoriesFragment.addCatagorie(new Catagorie(catagorieName, members));
+
+                                        }
+
+                                    }
+                                });
+
                             }
                         } else {
 
@@ -814,6 +937,90 @@ public class MainActivity extends AppCompatActivity {
 
 
         }
+
+    }
+
+    public void updateAccountSetingsToFirestore(final String user_name){
+
+        if (!TextUtils.isEmpty(user_name) && accountImageUri != null) {
+
+            progress.setVisibility(View.VISIBLE);
+
+
+
+                String user_id = mAuth.getCurrentUser().getUid();
+
+                StorageReference img_path = storageReference.child("profile_images").child(user_id + ".jpg");
+                img_path.putFile(accountImageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+
+                        if (task.isSuccessful()) {
+
+                            storeAccountUsernameFirestore(task, user_name);
+
+                        } else {
+
+                            String errorMessage = task.getException().getMessage();
+                            Toast.makeText(MainActivity.this, "Image Error: " + errorMessage, Toast.LENGTH_LONG).show();
+
+                            progress.setVisibility(View.INVISIBLE);
+
+                        }
+
+
+                    }
+                });
+
+        }
+
+    }
+
+    private void storeAccountUsernameFirestore(@NonNull Task<UploadTask.TaskSnapshot> task, String user_name){
+
+        Uri downloadUri;
+        if(task != null) {
+
+            downloadUri = task.getResult().getDownloadUrl();
+
+        } else {
+
+            downloadUri = accountImageUri;
+        }
+
+        String user_id = mAuth.getCurrentUser().getUid();
+        Map<String,String> userMap = new HashMap<>();
+        userMap.put("name",user_name);
+        userMap.put("image",downloadUri.toString());
+        firebaseFirestore.collection("Users").document(user_id).set(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+
+                if(task.isSuccessful()){
+
+                    Toast.makeText(MainActivity.this, "Updating settings",Toast.LENGTH_LONG).show();
+                    Intent mainIntent = new Intent(MainActivity.this, MainActivity.class);
+                    startActivity(mainIntent);
+                    finish();
+
+                } else {
+
+                    String errorMessage = task.getException().getMessage();
+                    Toast.makeText(MainActivity.this, "FIRESTORE Error: "+errorMessage,Toast.LENGTH_LONG).show();
+
+                }
+
+                progress.setVisibility(View.INVISIBLE);
+            }
+        });
+
+    }
+
+    public static void displayfragmentOnStart(int fragmentId){
+
+        displayFramentOnResume = fragmentId;
+
+
 
     }
 

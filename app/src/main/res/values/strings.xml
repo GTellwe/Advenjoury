@@ -37,4 +37,5 @@
     <string name="account_items_done_text">Achievements</string>
     <string name="latest_achievement_string">LATEST ACHIEVEMENTS</string>
     <string name="daily_progress_title">DAILY PROGRESS</string>>
+    <string name="update_account_settings_string">Update settings</string>
 </resources>

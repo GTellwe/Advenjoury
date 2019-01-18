@@ -60,6 +60,10 @@ public class DailyProgressRecyclerViewAdapter extends RecyclerView.Adapter<MyRec
         CardView
                 v = (CardView) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.daily_progress_list_item, parent, false);
+
+        ViewGroup.LayoutParams p = (ViewGroup.LayoutParams) v.getLayoutParams();
+        p.height = (int) 300;
+        //tmpItem.setCurrentHeight(p.height);
         MyRecyclerViewHolder vh = new MyRecyclerViewHolder(v);
         return vh;
     }
@@ -88,6 +92,9 @@ public class DailyProgressRecyclerViewAdapter extends RecyclerView.Adapter<MyRec
             constraintLayout.getChildAt(5).setVisibility(View.INVISIBLE);
             holder.getaSwitch().setChecked(false);
         }
+
+
+
 
 
         holder.getaSwitch().setOnClickListener(new View.OnClickListener() {

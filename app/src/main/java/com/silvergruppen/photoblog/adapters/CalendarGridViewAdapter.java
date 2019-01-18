@@ -3,6 +3,7 @@ package com.silvergruppen.photoblog.adapters;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -91,8 +92,8 @@ public class CalendarGridViewAdapter extends BaseAdapter {
             holder.getWrap().setBackgroundResource(R.drawable.calendar_item_background_drawable);
         }else {
 
-            holder.getDateTextView().setTextColor(Color.BLACK);
-            holder.getDailyProgressTextview().setTextColor(Color.BLACK);
+            holder.getDateTextView().setTextColor(Color.parseColor("#4F4F4F"));
+            holder.getDailyProgressTextview().setTextColor(Color.parseColor("#4F4F4F"));
             holder.getWrap().setBackgroundResource(0);
         }
 

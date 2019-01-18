@@ -1,6 +1,8 @@
 package com.silvergruppen.photoblog.fragments;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -19,6 +21,7 @@ import com.silvergruppen.photoblog.adapters.DailyProgressRecyclerViewAdapter;
 import com.silvergruppen.photoblog.adapters.RecycleViewAdapter;
 import com.silvergruppen.photoblog.items.Achievement;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -33,15 +36,15 @@ public class DailyProgressFragment extends Fragment {
     private DailyProgressRecyclerViewAdapter recycleViewAdapter;
     private Calendar calendar;
     private TextView dateTextView, progressTextView;
-    private ProgressBar progressBar;
+    //private ProgressBar progressBar;
 
 
     public DailyProgressFragment(){
 
         dailyAchievementsList = new ArrayList<>();
-        dailyAchievementsList.add(new Achievement("meditate  for 10 minutes","Daily","10",false));
-        dailyAchievementsList.add(new Achievement("Walk 10 000 steps","Daily","10",false));
-        dailyAchievementsList.add(new Achievement("Walk 10 steps","Daily","10",false));
+        dailyAchievementsList.add(new Achievement("meditate  for 10 minutes","Daily","10",false,"daily"));
+        dailyAchievementsList.add(new Achievement("Walk 10 000 steps","Daily","10",false,"daily"));
+        dailyAchievementsList.add(new Achievement("Walk 10 steps","Daily","10",false,"daily"));
 
     }
 
@@ -52,30 +55,37 @@ public class DailyProgressFragment extends Fragment {
 
         dateTextView = view.findViewById(R.id.daily_progrtess_day_text);
         progressTextView = view.findViewById(R.id.progres_text_view);
-        progressBar = view.findViewById(R.id.progressbar_daily_progress);
-        progressBar.setIndeterminate(false);
+        final ProgressBar progressBar = view.findViewById(R.id.progressbar_daily_progress);
 
+
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         if(calendar != null)
-            dateTextView.setText(Integer.toString(calendar.get(Calendar.DAY_OF_MONTH))+"/"+Integer.toString(calendar.get(Calendar.MONTH)));
+            dateTextView.setText(dateFormat.format(calendar.getTime()));
 
         MainActivity mainActivity = (MainActivity) getActivity();
         ArrayList<Integer> dailyProgress = mainActivity.getDailyProgressHashMap().get(calendar);
-        if(dailyProgress == null) {
-            progressTextView.setText("0/3");
 
-        }else{
-
-            Integer numberOfDoneTasks = Collections.frequency(dailyProgress,1);
-            progressTextView.setText(Integer.toString(numberOfDoneTasks) + "/3");
-            float progress = 100/3*numberOfDoneTasks ;
-            Log.d("\n \n \n \n \n progress", Integer.toString(progressBar.getMax()));
-            progressBar.setMax(50);
-            progressBar.setProgress(20);
-            progressBar.setProgress(0); // <--
-            progressBar.setMax(100);
-            progressBar.setProgress((int)progress);
+        Resources res = getResources();
+        Drawable drawable = res.getDrawable(R.drawable.circular_progress_bar);
+        Integer numberOfDoneTasks =0;
+        if(dailyProgress != null) {
+            numberOfDoneTasks = Collections.frequency(dailyProgress,1);
 
         }
+
+        progressTextView.setText(Integer.toString(numberOfDoneTasks) + "/3");
+        float progress = 100/3*numberOfDoneTasks ;
+        Log.d("\n \n \n \n \n progress", Integer.toString(numberOfDoneTasks));
+        progressBar.setProgress((int)numberOfDoneTasks);
+        progressBar.setSecondaryProgress(100);
+        progressBar.setMax(100);
+        progressBar.setProgressDrawable(drawable);
+
+
+
+
+
         dailyProgressRecyclerView = (RecyclerView) view.findViewById(R.id.daily_progress_list_view);
         dailyProgressRecyclerView.setHasFixedSize(true);
 

@@ -17,7 +17,7 @@ import java.util.List;
 public class Achievement extends RecycleListItem{
     private String points;
     private AchievementListViewHolder holder;
-    private boolean open = false;
+    private boolean open = true;
     private String topic;
     private final int expandedHeight = 800, collapsedHeight = 300;
     private int currentHeight = 300;
@@ -32,6 +32,9 @@ public class Achievement extends RecycleListItem{
 
     private boolean done;
 
+    private String catagorie;
+
+
 
 
     private FirebaseAuth firebaseAuth;
@@ -40,7 +43,7 @@ public class Achievement extends RecycleListItem{
 
 
 
-    public Achievement(String name,String topic, String points, boolean done) {
+    public Achievement(String name,String topic, String points, boolean done, String catagorie) {
         super(name);
         this.points = points;
         this.currentHeight = currentHeight;
@@ -48,6 +51,7 @@ public class Achievement extends RecycleListItem{
         postList = new ArrayList<>();
         postHashMap = new HashMap<>();
         this.done = done;
+        this.catagorie = catagorie;
 
     }
 /*
@@ -65,6 +69,14 @@ public class Achievement extends RecycleListItem{
 
     }
 */
+
+    public String getCatagorie() {
+        return catagorie;
+    }
+
+    public void setCatagorie(String catagorie) {
+        this.catagorie = catagorie;
+    }
 
     public boolean[] getDailyProgressDone() {
         return dailyProgressDone;

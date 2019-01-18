@@ -87,9 +87,10 @@ public class DispayUserProfileActivity extends AppCompatActivity {
 
 
                                 final String name = tmpMap.get("name").toString();
+                                final String catagorie = tmpMap.get("topic").toString();
                                 // check if user has done achievement
 
-                                Achievement tmpAchievement = new Achievement(name, tmpMap.get("topic").toString(), tmpMap.get("points").toString(), false);
+                                Achievement tmpAchievement = new Achievement(name, tmpMap.get("topic").toString(), tmpMap.get("points").toString(), false,catagorie);
                                 achievementsList.add(tmpAchievement);
 
 
