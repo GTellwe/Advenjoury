@@ -81,12 +81,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     // fragments
-    private HomeFragment homeFragment;
-    private AchievementsFragment2 achievementsFragment;
+    //private HomeFragment homeFragment;
+    //private AchievementsFragment2 achievementsFragment;
     private AccountFragment accountFragment;
     private CalendarFragment calendarFragment;
-    private CatagoriesFragment catagoriesFragment;
-    private AchievementFragment achievementFragment;
+    //private CatagoriesFragment catagoriesFragment;
+    //private AchievementFragment achievementFragment;
     private DailyProgressFragment dailyProgressFragment;
     private AccountSettingsFragment accountSettingsFragment;
 
@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int accountFragmentId = 0,calendarFragmentId=2, catogiresFragmentId = 1, homefragmentId=3;
 
-    public static int displayFramentOnResume = homefragmentId;
+    public static int displayFramentOnResume = calendarFragmentId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,12 +137,12 @@ public class MainActivity extends AppCompatActivity {
         allPostItems = new ArrayList<>();
         allUsersID = new ArrayList<>();
         // Initialize fragments
-        homeFragment = new HomeFragment();
-        achievementsFragment = new AchievementsFragment2();
+        //homeFragment = new HomeFragment();
+       // achievementsFragment = new AchievementsFragment2();
         accountFragment = new AccountFragment();
         calendarFragment = new CalendarFragment();
-        catagoriesFragment = new CatagoriesFragment();
-        achievementFragment = new AchievementFragment();
+        //catagoriesFragment = new CatagoriesFragment();
+        //achievementFragment = new AchievementFragment();
         dailyProgressFragment = new DailyProgressFragment();
         accountSettingsFragment = new AccountSettingsFragment();
 
@@ -224,24 +224,26 @@ public class MainActivity extends AppCompatActivity {
 
                     switch (menuItem.getItemId()) {
 
-                        case R.id.bottom_action_home:
+                        /*case R.id.bottom_action_home:
                             replaceFragment(homeFragment);
                             return true;
                         case R.id.bottom_action_achievement:
                             replaceFragment(catagoriesFragment);
-                            return true;
+                            return true;*/
                         case R.id.bottom_action_account:
-                            replaceFragment(accountFragment);
+                            Log.d("Action account","\n \n ");
+                            replaceFragment(accountFragmentId);
                             return true;
                         case R.id.bottom_action_daily_progress:
-                            mainToolbarHeadline.setText("CALENDAR");
-                            replaceFragment(calendarFragment);
+                            Log.d("Action daily","\n \n ");
+                            replaceFragment(calendarFragmentId);
                             return true;
+                            /*
                         case R.id.bottom_action_search:
 
                             Intent searchIntent = new Intent(MainActivity.this, SearchActivity.class);
                             startActivity(searchIntent);
-
+*/
                         default:
                             return false;
 
@@ -415,14 +417,20 @@ public class MainActivity extends AppCompatActivity {
     public void startDailyProgressFragment(Calendar calendar){
 
         dailyProgressFragment.setCalendar(calendar);
+
+        Bundle bundle = new Bundle();
+        bundle.putString("uid",current_user_id);
+        dailyProgressFragment.setArguments(bundle);
         replaceFragment(dailyProgressFragment);
     }
-    public void startAchievementFragment(Catagorie catagorie){
 
+    public void startAchievementFragment(Catagorie catagorie){
+/*
 
         mainToolbarHeadline.setText(catagorie.getName().toUpperCase());
         achievementsFragment.setCurrentCatagorie(catagorie);
         replaceFragment(achievementsFragment);
+        */
     }
 
     public void setHeadline(String headline){
@@ -431,6 +439,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startAchievementActivity(Achievement achievement){
+        /*
 
         // clear all journal items
         achievementFragment.clearAllJournalItems();
@@ -452,6 +461,7 @@ public class MainActivity extends AppCompatActivity {
         // Intent achievementIntent = new Intent(MainActivity.this, AchievementActivity.class);
         //startActivity(achievementIntent);
         //startActivity(achievementIntent);
+        */
     }
     public void loadAllUserData(){
 
@@ -498,14 +508,28 @@ public class MainActivity extends AppCompatActivity {
         switch (fragmentId){
 
             case accountFragmentId:
+                Bundle bundle = new Bundle();
+                bundle.putString("uid",current_user_id);
+                mainToolbarHeadline.setText("ACCOUNT");
+                accountFragment.setArguments(bundle);
                 replaceFragment(accountFragment);
+                break;
+                /*
             case homefragmentId:
                 replaceFragment(homeFragment);
             case catogiresFragmentId:
                 replaceFragment(catagoriesFragment);
+                */
             case calendarFragmentId:
+                mainToolbarHeadline.setText("CALENDAR");
+                Bundle bundle2 = new Bundle();
+                bundle2.putString("uid",current_user_id);
+                calendarFragment.setArguments(bundle2);
+                Log.d("replace calendar \n \n \n"," ");
                 replaceFragment(calendarFragment);
+                break;
                 default:
+                    break;
 
         }
 
@@ -546,7 +570,7 @@ public class MainActivity extends AppCompatActivity {
          *  Checks if the achievment is done
          *
          */
-
+/*
         firebaseFirestore = FirebaseFirestore.getInstance();
         achievementsList = new ArrayList<>();
         achievementsList.clear();
@@ -648,6 +672,7 @@ public class MainActivity extends AppCompatActivity {
                         loadingTaskDone();
                     }
                 });
+                */
     }
 
     public void loadNameAndProfilePicture(){
@@ -754,6 +779,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadPostItems(){
+        /*
 
         // clear all post items before loading all the postitems.
         allPostItems.clear();
@@ -787,8 +813,15 @@ public class MainActivity extends AppCompatActivity {
                                 postImageUrl = tmpMap.get("image_url").toString();
 
                             Date timestamp = (Date) tmpMap.get("timestamp");
-                            String topic = tmpMap.get("topic").toString();
-                            String achievement_name = tmpMap.get("achievement_name").toString();
+
+                            String topic = null;
+                            if(tmpMap.get("topic") != null)
+                                topic = tmpMap.get("topic").toString();
+
+                            String achievement_name = null;
+                            if(tmpMap.get("achievement_name") != null)
+                                topic = tmpMap.get("achievement_name").toString();
+
                             String headline = "Added new post on achievement \""+ achievement_name+"\"";
                             PostItem tmpPostItem = new PostItem(user.getName(),postImageUrl,desc, image_thumb, timestamp, user.getImageUrl(), user.getId(), topic, achievement_name, headline);
                             allPostItems.add(tmpPostItem);
@@ -806,6 +839,7 @@ public class MainActivity extends AppCompatActivity {
             });
 
         }
+        */
     }
     public void loadNUmberOfPosts(){
 
@@ -847,6 +881,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadCatagories(){
+        /*
 
         //Get the topics from Firebase and show in nav view
         firebaseFirestore.collection("Topics")
@@ -879,6 +914,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+                */
     }
 
     public void setAchievementDoneInfireBase(Boolean done, final Achievement achievementItem){

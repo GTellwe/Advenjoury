@@ -96,7 +96,8 @@ public class HomeFragment extends Fragment {
     }
     public static void clearPostItemsList(){
 
-        postItems.clear();
+        if(postItems != null)
+            postItems.clear();
     }
 
     // comparator for sorting the post items after date

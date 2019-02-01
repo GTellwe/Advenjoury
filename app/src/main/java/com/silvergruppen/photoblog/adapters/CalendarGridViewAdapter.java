@@ -70,22 +70,14 @@ public class CalendarGridViewAdapter extends BaseAdapter {
             holder = new CalendarGridViewHolder(dateNumberTextView, dailyProgressTextView, wrap);
 
 
-
-
         }else
             holder = (CalendarGridViewHolder) convertView.getTag();
 
         holder.getDateTextView().setText(Integer.toString(calendarItem.getCalendar().get(Calendar.DAY_OF_MONTH)));
-        MainActivity mainActivity = (MainActivity) context;
-        ArrayList<Integer> dailyProgressArray = mainActivity.getDailyProgressHashMap().get(calendarItem.getCalendar());
-        int dailyProgressInt = 0;
 
-        if(dailyProgressArray != null) {
-            dailyProgressInt = Collections.frequency(dailyProgressArray, 1);
-        }
-
-        holder.getDailyProgressTextview().setText(Integer.toString(dailyProgressInt)+"/3");
-        if(dailyProgressInt == 3){
+        Log.d("\n \n \n "+calendarItem.getProgress(),"erervv");
+        holder.getDailyProgressTextview().setText(calendarItem.getProgress()+"/8");
+        if(calendarItem.getProgress() == 8){
 
             holder.getDateTextView().setTextColor(Color.WHITE);
             holder.getDailyProgressTextview().setTextColor(Color.WHITE);
@@ -115,5 +107,11 @@ public class CalendarGridViewAdapter extends BaseAdapter {
         return convertView;
     }
 
+    public ArrayList<CalendarItem> getCalendarItems() {
+        return calendarItems;
+    }
 
+    public void setCalendarItems(ArrayList<CalendarItem> calendarItems) {
+        this.calendarItems = calendarItems;
+    }
 }

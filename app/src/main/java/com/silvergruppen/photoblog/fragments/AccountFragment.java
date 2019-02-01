@@ -2,7 +2,10 @@ package com.silvergruppen.photoblog.fragments;
 
 
 import android.app.Activity;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -25,6 +28,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.silvergruppen.photoblog.R;
 import com.silvergruppen.photoblog.adapters.AchievementListAdapter;
 import com.silvergruppen.photoblog.items.Achievement;
+import com.silvergruppen.photoblog.other.User;
+import com.silvergruppen.photoblog.viewmodels.UserProfileViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +37,18 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
+
 /**
  * A simple {@link Fragment} subclass.
  */
 
 public class AccountFragment extends Fragment {
+
+    //new Code
+    private static final String UID_KEY = "uid";
+    private UserProfileViewModel viewModel;
+
+    // old code
 
     private TextView accountName, levelTextView, achievementsDoneTextView, postsTextView, followersTextView;
     private CircleImageView imageView;
@@ -65,12 +77,43 @@ public class AccountFragment extends Fragment {
 
     }
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_account, container, false);
+
+        //new code
+        String userId = getArguments().getString(UID_KEY);
+        viewModel = ViewModelProviders.of(this).get(UserProfileViewModel.class);
+        viewModel.init(userId);
+
+        // get the username from Firebase and set the image and headline
+        accountName = view.findViewById(R.id.account_name);
+        imageView = view.findViewById(R.id.profile_image);
+
+        // Create the observer which updates the UI.
+        final Observer<User> userObserver = new Observer<User>() {
+            @Override
+            public void onChanged(@Nullable final User newUser) {
+                // Update the UI, in this case, a TextView.
+                accountName.setText(newUser.getName());
+                RequestOptions placeholderRequest = new RequestOptions();
+                placeholderRequest.placeholder(R.drawable.profile_icon);
+                Glide.with(getContext()).setDefaultRequestOptions(placeholderRequest).load(newUser.getImageUrl()).into(imageView);
+
+            }
+        };
+
+        viewModel.getUser().observe(this,userObserver);
+        /*
+        // old code
 
         // initializations
 
@@ -109,6 +152,7 @@ public class AccountFragment extends Fragment {
         // set the progress
         levelProgress = view.findViewById(R.id.account_progress);
         levelProgress.setProgress(getLevelProgress());
+        */
 
         return view;
     }

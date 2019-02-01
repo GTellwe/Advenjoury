@@ -23,10 +23,10 @@ public class ResizeAnimation extends Animation {
     private DailyProgressRecyclerViewAdapter mListAdapter;
     private Achievement mListItem;
 
-    public ResizeAnimation(DailyProgressRecyclerViewAdapter listAdapter, Achievement listItem, float fromHeight, float toHeight) {
+    public ResizeAnimation(View view,DailyProgressRecyclerViewAdapter listAdapter, Achievement listItem, float fromHeight, float toHeight) {
         mToHeight = toHeight;
         mFromHeight = fromHeight;
-        mView = listItem.getRecyclerHolder().parentLayout;
+        mView = (CardView) view;
         mListAdapter = listAdapter;
         mListItem = listItem;
         setDuration(200);

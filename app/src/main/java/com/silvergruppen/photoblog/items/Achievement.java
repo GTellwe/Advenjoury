@@ -17,7 +17,7 @@ import java.util.List;
 public class Achievement extends RecycleListItem{
     private String points;
     private AchievementListViewHolder holder;
-    private boolean open = true;
+    private boolean open;
     private String topic;
     private final int expandedHeight = 800, collapsedHeight = 300;
     private int currentHeight = 300;
@@ -33,6 +33,8 @@ public class Achievement extends RecycleListItem{
     private boolean done;
 
     private String catagorie;
+
+    private String desc;
 
 
 
@@ -52,6 +54,20 @@ public class Achievement extends RecycleListItem{
         postHashMap = new HashMap<>();
         this.done = done;
         this.catagorie = catagorie;
+        open = false;
+
+    }
+    public Achievement(String name,String topic, String points, boolean done, String catagorie,String desc) {
+        super(name);
+        this.points = points;
+        this.currentHeight = currentHeight;
+        this.topic = topic;
+        postList = new ArrayList<>();
+        postHashMap = new HashMap<>();
+        this.done = done;
+        this.catagorie = catagorie;
+        this.desc = desc;
+        open = false;
 
     }
 /*
@@ -69,6 +85,14 @@ public class Achievement extends RecycleListItem{
 
     }
 */
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
 
     public String getCatagorie() {
         return catagorie;
