@@ -21,8 +21,10 @@ android:layout_height="match_parent">
         app:tabIndicatorHeight="4dp"
         app:tabMode="fixed"
         app:tabSelectedTextColor="@color/colorBlack"
-        app:tabTextColor="@color/colorGrey2"
+        app:tabTextAppearance="@style/TabText"
 
+
+        app:tabTextColor="@color/colorGrey2"
         app:titleTextAppearance="@style/Toolbar.TitleText" />
 </android.support.design.widget.AppBarLayout>
 

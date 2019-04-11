@@ -1,38 +1,28 @@
 package com.silvergruppen.photoblog.adapters;
 
 import android.content.Context;
-import android.media.Image;
-import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Switch;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.silvergruppen.photoblog.R;
 import com.silvergruppen.photoblog.activities.MainActivity;
 import com.silvergruppen.photoblog.animations.ResizeAnimation;
-import com.silvergruppen.photoblog.fragments.DailyProgressFragment;
 import com.silvergruppen.photoblog.holders.MyRecyclerViewHolder;
 import com.silvergruppen.photoblog.items.Achievement;
-import com.silvergruppen.photoblog.items.Catagorie;
-import com.silvergruppen.photoblog.items.RecycleListItem;
 import com.silvergruppen.photoblog.other.DailyProgress;
-import com.silvergruppen.photoblog.viewmodels.DailyProgressViewModel;
+import com.silvergruppen.photoblog.other.MonthlyProgress;
+import com.silvergruppen.photoblog.other.WeekleyProgress;
+import com.silvergruppen.photoblog.viewmodels.ProgressViewModel;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 
 public class DailyProgressRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewHolder> {
 
@@ -44,18 +34,34 @@ public class DailyProgressRecyclerViewAdapter extends RecyclerView.Adapter<MyRec
     private MainActivity mainActivity;
     private Calendar calendar;
     private DailyProgress dailyProgress;
-    private DailyProgressViewModel viewModel;
-
+    private ProgressViewModel viewModel;
+    private WeekleyProgress weekleyProgress;
+    private MonthlyProgress monthlyProgress;
+    private final static int dailyId=1, weekleyId = 2, monthlyId = 3;
 
 
     public DailyProgressRecyclerViewAdapter(Context context,
-                                            DailyProgressViewModel viewModel) {
+                                            ProgressViewModel viewModel, int type) {
 
 
-        if(viewModel.getDailyProgress().getValue() != null)
-            dailyItems = viewModel.getDailyProgress().getValue().getDailyAchievementsList();
-        else
-            dailyItems = new ArrayList<>();
+        if (type == dailyId) {
+            if (viewModel.getDailyProgress().getValue() != null)
+                dailyItems = viewModel.getDailyProgress().getValue().getDailyAchievementsList();
+            else
+                dailyItems = new ArrayList<>();
+        } else if (type == weekleyId) {
+            if (viewModel.getWeekleyProgress().getValue() != null)
+                dailyItems = viewModel.getWeekleyProgress().getValue().getWeekleyAchievementsList();
+            else
+                dailyItems = new ArrayList<>();
+        } else if (type == monthlyId){
+            if (viewModel.getMonthlyProgress().getValue() != null)
+                dailyItems = viewModel.getMonthlyProgress().getValue().getMonthlyAchievementsList();
+            else
+                dailyItems = new ArrayList<>();
+
+
+        }
 /*
         dailyItems = new ArrayList<>();
         dailyItems.add(new Achievement("Meditate","Daily","10",false,"daily",
@@ -191,7 +197,7 @@ public class DailyProgressRecyclerViewAdapter extends RecyclerView.Adapter<MyRec
             dailyProgressList.set(position,done);
         }
 */
-        viewModel.updateDailyProgress(position, done);
+        viewModel.updateProgress(position, done);
 
     }
 
@@ -286,6 +292,21 @@ public class DailyProgressRecyclerViewAdapter extends RecyclerView.Adapter<MyRec
     public void setDailyProgress(DailyProgress dailyProgress) {
         this.dailyProgress = dailyProgress;
         dailyItems = dailyProgress.getDailyAchievementsList();
+        notifyDataSetChanged();
+
+    }
+
+    public void setWeekleyProgress(WeekleyProgress weekleyProgress) {
+
+        this.weekleyProgress = weekleyProgress;
+        dailyItems = weekleyProgress.getWeekleyAchievementsList();
+        notifyDataSetChanged();
+
+    }
+    public void setMonthlyProgress(MonthlyProgress weekleyProgress) {
+
+        this.monthlyProgress = weekleyProgress;
+        dailyItems = monthlyProgress.getMonthlyAchievementsList();
         notifyDataSetChanged();
 
     }

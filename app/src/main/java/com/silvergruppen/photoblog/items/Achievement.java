@@ -22,7 +22,7 @@ public class Achievement extends RecycleListItem{
     private final int expandedHeight = 800, collapsedHeight = 300;
     private int currentHeight = 300;
 
-    private ArrayList<AchievementPost> postList;
+    private ArrayList<PostItem> postList;
 
     private HashMap<Object,Date> postHashMap;
 
@@ -120,7 +120,7 @@ public class Achievement extends RecycleListItem{
 
 
     public void addJournalItem(String text, String imagePath, Date timestamp){
-        postList.add(new AchievementPost(text,imagePath,timestamp));
+        postList.add(new PostItem(text,imagePath,timestamp));
         //expandedHeight = expandedHeight + 1200;
     }
 
@@ -132,7 +132,7 @@ public class Achievement extends RecycleListItem{
         this.topic = topic;
     }
 
-    public ArrayList<AchievementPost> getBlogPostList() {
+    public ArrayList<PostItem> getBlogPostList() {
         return postList;
     }
 

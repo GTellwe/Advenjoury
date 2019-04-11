@@ -32,6 +32,13 @@ public class PostItem {
 
     }
 
+    public PostItem(String desc, String image_url, Date timeStamp){
+
+        this.desc = desc;
+        this.image_url = image_url;
+        this.timeStamp = timeStamp;
+    }
+
     public String getHeadline() {
         return headline;
     }

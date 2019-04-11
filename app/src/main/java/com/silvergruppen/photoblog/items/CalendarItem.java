@@ -7,10 +7,15 @@ public class CalendarItem {
     private Calendar calendar;
     private int progress;
 
+
     public CalendarItem(Calendar calendar) {
+
         this.calendar = calendar;
+
         progress = 0;
     }
+
+
 
     public Calendar getCalendar() {
         return calendar;

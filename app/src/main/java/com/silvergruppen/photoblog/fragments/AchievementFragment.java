@@ -25,23 +25,35 @@ import java.util.List;
 
 public class AchievementFragment extends Fragment {
 
+    // constants
+    private static final String UID_KEY = "uid";
 
+    // views
     private Toolbar toolbar;
     private TabLayout tabLayout;
-    private ArrayList<Fragment> fragmentsList;
-    private ViewPagerAdapter viewPagerAdapter;
     private ViewPager viewPager;
+
+    // lists
+    private ArrayList<Fragment> fragmentsList;
+
+    // activities
     private FragmentActivity myContext;
+
+    // fragments
     private HowtoFragment howtoFragment;
     private JournalFragment journalFragment;
     private AchievementSettingsFragment settingsFragment;
+
+    // other
     private Achievement achievement;
+    private ViewPagerAdapter viewPagerAdapter;
 
     public AchievementFragment(){
 
         howtoFragment = new HowtoFragment();
         journalFragment  = new JournalFragment();
         settingsFragment = new AchievementSettingsFragment();
+
     }
 
 
@@ -67,6 +79,9 @@ public class AchievementFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.activity_achievement, container, false);
+        String userId = getArguments().getString(UID_KEY);
+        journalFragment.setUserId(userId);
+        journalFragment.setAchievement(achievement);
 
         viewPager = (ViewPager) view.findViewById(R.id.achievement_view_pager);
         setupViewPager(viewPager);
@@ -91,15 +106,7 @@ public class AchievementFragment extends Fragment {
         fragmentTransaction.commit();
     }
 
-    public void addJournalItem(PostItem postItem){
 
-        journalFragment.addPostItem(postItem);
-
-    }
-    public void clearAllJournalItems(){
-
-        journalFragment.clearPostItemsList();
-    }
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(myContext.getSupportFragmentManager());
         adapter.addFragment(howtoFragment, "How to");

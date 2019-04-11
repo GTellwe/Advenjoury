@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="search_hint_string">Search here</string>
+    <string name="daily_progressbar_title">Daily progress</string>
+    <string name="weekly_progressbar_title">Weekly progress</string>
+    <string name="monthly_progressbar_title">Monthly progress</string>
 </resources>

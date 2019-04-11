@@ -9,6 +9,12 @@
         <item name="coordinatorLayoutStyle">@style/Widget.Support.CoordinatorLayout</item>
 
     </style>
+    <style name="AppTheme.Launcher">
+    <item name="android:windowBackground">@drawable/splash</item>
+    <!-- Optional, on Android 5+ you can modify the colorPrimaryDark color to match the windowBackground color for further branding-->
+    <!-- <item name="colorPrimaryDark">@android:color/white</item> -->
+    </style>
+
 
     <style name="ToolbarTheme" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
         <!-- android:textColorPrimary is the color of the title text in the Toolbar  -->
@@ -24,5 +30,11 @@
 
     <style name="SwitchCompatTheme" >
         <item name="colorControlActivated">#92D980</item>
+    </style>
+
+    <style name="TabText" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/montserrat</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textSize">12sp</item>
     </style>
 </resources>

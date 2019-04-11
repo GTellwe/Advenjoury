@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PhotoBlog</string>
+    <string name="app_name">Achie</string>
     <string name="pass_hint">Password...</string>
     <string name="email_hint">Your email...</string>
     <string name="login_btn_text">Login</string>

@@ -22,7 +22,7 @@ import com.silvergruppen.photoblog.items.RecycleListItem;
 import java.util.ArrayList;
 
 public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.MyViewHolder> {
-    private ArrayList<? extends RecycleListItem> catagoriesItems;
+    private ArrayList<? extends RecycleListItem> listItems;
     private ArrayList<Achievement> achievemetItems;
     private Context context;
     private FirebaseAuth firebaseAuth;
@@ -41,7 +41,7 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
 
     public RecycleViewAdapter(Context context,
                               ArrayList<? extends RecycleListItem> catagoriesItems) {
-        this.catagoriesItems = catagoriesItems;
+        this.listItems = catagoriesItems;
         this.context = context;
         firebaseFirestore = FirebaseFirestore.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
@@ -68,7 +68,7 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
 
-        final RecycleListItem tmpItem = catagoriesItems.get(position);
+        final RecycleListItem tmpItem = listItems.get(position);
         Achievement tmpAchievement = null;
 
         //holder.parentLayout.setTranslationZ(cardView.getElevation()+10*position);
@@ -88,15 +88,21 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
             }
         });
         TextView textView = (TextView) constraintLayout.getChildAt(0);
-        textView.setText(catagoriesItems.get(position).getName());
+        textView.setText(listItems.get(position).getName());
 
     }
 
     @Override
     public int getItemCount() {
 
-        return catagoriesItems.size();
+        return listItems.size();
 
+    }
+
+    public void updateList(ArrayList<RecycleListItem> newAchievements){
+
+        listItems = newAchievements;
+        notifyDataSetChanged();
     }
 
 

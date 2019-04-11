@@ -50,8 +50,8 @@ public class MyRecyclerViewHolder extends RecyclerView.ViewHolder {
             upArrowImageView.setVisibility(open ? View.VISIBLE : View.GONE);
             checkImage.setVisibility(done? View.VISIBLE : View.GONE);
             aSwitch.setVisibility(open ? View.VISIBLE : View.GONE);
-            //aSwitch.setOnClickListener(null);
-            //aSwitch.setChecked(achievment.isDone());
+            aSwitch.setOnCheckedChangeListener(null);
+            aSwitch.setChecked(achievment.isDone());
 
 
             nameTextView.setText(achievment.getName());

@@ -127,7 +127,7 @@ public class SearchActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
 
                 switch (menuItem.getItemId()) {
-
+/*
                     case R.id.bottom_action_home:
 
                         //MainActivity.replaceFragment(MainActivity.homefragmentId);
@@ -142,6 +142,7 @@ public class SearchActivity extends AppCompatActivity {
                         MainActivity.displayfragmentOnStart(MainActivity.accountFragmentId);
                         finish();
                         return true;
+                        */
                     case R.id.bottom_action_daily_progress:
                         MainActivity.displayfragmentOnStart(MainActivity.calendarFragmentId);
                         finish();

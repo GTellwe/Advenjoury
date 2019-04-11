@@ -1,46 +1,21 @@
 package com.silvergruppen.photoblog.adapters;
 
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.text.format.DateFormat;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.silvergruppen.photoblog.holders.AchievementListViewHolder;
 import com.silvergruppen.photoblog.R;
 import com.silvergruppen.photoblog.activities.MainActivity;
-import com.silvergruppen.photoblog.activities.NewPostActivity;
-import com.silvergruppen.photoblog.animations.ResizeAnimation;
 import com.silvergruppen.photoblog.items.Achievement;
-import com.silvergruppen.photoblog.items.AchievementPost;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 public class AchievementListAdapter extends ArrayAdapter<Achievement> {
     private ArrayList<Achievement> achievementItems;

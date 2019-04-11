@@ -24,33 +24,33 @@ import java.util.HashMap;
  */
 public class AchievementsFragment extends Fragment {
 
+    // Constants
     private final int  COLLAPSED_HEIGHT_2 = 250;
-
     private final int EXPANDED_HEIGHT_4 = 600;
 
+    // views
     public ListView achievementsListView;
-
-
-    public ArrayList<Achievement> listAchievements;
-    public ArrayList<Achievement> listDisplayedAchievements;
-
-    private HashMap<String,Integer> listAchievementsMap;
-
-    private AchievementListAdapter achievementListAdapter;
-    private boolean accordion = true;
-
-
-    public FirebaseFirestore firebaseFirestore;
-
-    private FirebaseAuth mAuth;
-
-    private String current_user_id;
-
     public TextView title;
 
-    private String currentAchievement;
+    // Lists
+    public ArrayList<Achievement> listAchievements;
+    public ArrayList<Achievement> listDisplayedAchievements;
+    private HashMap<String,Integer> listAchievementsMap;
 
+    // firebase
+    public FirebaseFirestore firebaseFirestore;
+    private FirebaseAuth mAuth;
+
+    // strings
+    private String current_user_id;
+    private String currentAchievement;
     public String topic;
+
+    // other
+    private AchievementListAdapter achievementListAdapter;
+
+
+
     public AchievementsFragment() {
         listAchievements = new ArrayList<>();
         listDisplayedAchievements = new ArrayList<>();

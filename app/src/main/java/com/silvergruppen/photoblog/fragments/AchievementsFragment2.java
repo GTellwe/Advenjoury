@@ -1,7 +1,10 @@
 package com.silvergruppen.photoblog.fragments;
 
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -20,6 +24,8 @@ import com.silvergruppen.photoblog.adapters.RecycleViewAdapter;
 import com.silvergruppen.photoblog.items.Achievement;
 import com.silvergruppen.photoblog.items.Catagorie;
 import com.silvergruppen.photoblog.items.RecycleListItem;
+import com.silvergruppen.photoblog.viewmodels.AchievmentsViewModel;
+import com.silvergruppen.photoblog.viewmodels.CalendarViewModel;
 
 import java.util.ArrayList;
 
@@ -31,32 +37,31 @@ import de.hdodenhof.circleimageview.CircleImageView;
  */
 public class AchievementsFragment2 extends Fragment {
 
-
+    // Views
     public RecyclerView achievementsRecyclerView;
+    private CircleImageView profileImage;
+    private TextView titleTextView;
 
-    private ArrayList<Achievement> achievementsList;
-
-
+    // Lists
     public ArrayList<RecycleListItem> listAchievements;
 
-    private Catagorie currentCatagorie;
-
-
+    // firebase
     public FirebaseFirestore firebaseFirestore;
-    private RecyclerView.LayoutManager mLayoutManager;
-
     private FirebaseAuth mAuth;
 
+    // strings
     private String current_user_id;
-    private RecycleViewAdapter catagoriesListAdapter;
-    private CircleImageView profileImage;
-    private String imageURL;
-    private MainActivity mainActivity;
     private  final String headline = "ACIEVEMENTS";
-    private TextView progressTextView;
+    private String imageURL;
+
+    //other
+    private Catagorie currentCatagorie;
+    private RecyclerView.LayoutManager mLayoutManager;
+    private RecycleViewAdapter catagoriesListAdapter;
+    private MainActivity mainActivity;
+    private AchievmentsViewModel achievmentsViewModel;
 
 
-    private TextView titleTextView;
 
 
     public AchievementsFragment2() {
@@ -99,6 +104,7 @@ public class AchievementsFragment2 extends Fragment {
         }
 
         // Handle the list of achievements
+
         achievementsRecyclerView = (RecyclerView) view.findViewById(R.id.catagories_list_view);
         achievementsRecyclerView.setHasFixedSize(true);
 
@@ -108,11 +114,22 @@ public class AchievementsFragment2 extends Fragment {
         achievementsRecyclerView.setAdapter(catagoriesListAdapter);
         catagoriesListAdapter.notifyDataSetChanged();
 
-        // set the text of the progress text view
-        progressTextView = view.findViewById(R.id.achievements_progres_text_view);
+        // load the achievmeents
+        achievmentsViewModel = ViewModelProviders.of(this).get(AchievmentsViewModel.class);
+        achievmentsViewModel.init();
+        final Observer<ArrayList<RecycleListItem>> achievementsObserver = new Observer<ArrayList<RecycleListItem>>() {
+            @Override
+            public void onChanged(@Nullable final ArrayList<RecycleListItem> newAchievements) {
+                listAchievements =newAchievements;
+                catagoriesListAdapter.updateList(getListOfAchievementsInCatagorie(currentCatagorie));
 
-        if(currentCatagorie != null)
-            progressTextView.setText(Integer.toString(mainActivity.getAchievementsDoneByCurrentUser(currentCatagorie))+"/"+Integer.toString(currentCatagorie.getNumberOfAchievments()));
+            }
+        };
+        achievmentsViewModel.getAchievementsList().observe(this,achievementsObserver);
+
+
+        //if(currentCatagorie != null)
+            //progressTextView.setText(Integer.toString(mainActivity.getAchievementsDoneByCurrentUser(currentCatagorie))+"/"+Integer.toString(currentCatagorie.getNumberOfAchievments()));
         return view;
     }
 
@@ -127,8 +144,8 @@ public class AchievementsFragment2 extends Fragment {
 
     }
 
-    private ArrayList<Achievement> getListOfAchievementsInCatagorie(Catagorie catagorie){
-        ArrayList<Achievement> achievementsInCatagorie = new ArrayList<>();
+    private ArrayList<RecycleListItem> getListOfAchievementsInCatagorie(Catagorie catagorie){
+        ArrayList<RecycleListItem> achievementsInCatagorie = new ArrayList<>();
 
         for(RecycleListItem tmpRecycklerListItem: listAchievements){
 

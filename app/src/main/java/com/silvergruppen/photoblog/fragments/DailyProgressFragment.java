@@ -2,10 +2,8 @@ package com.silvergruppen.photoblog.fragments;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -19,35 +17,31 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 import com.silvergruppen.photoblog.R;
 import com.silvergruppen.photoblog.activities.MainActivity;
 import com.silvergruppen.photoblog.adapters.DailyProgressRecyclerViewAdapter;
-import com.silvergruppen.photoblog.adapters.RecycleViewAdapter;
-import com.silvergruppen.photoblog.items.Achievement;
 import com.silvergruppen.photoblog.other.DailyProgress;
-import com.silvergruppen.photoblog.other.User;
-import com.silvergruppen.photoblog.viewmodels.DailyProgressViewModel;
-import com.silvergruppen.photoblog.viewmodels.UserProfileViewModel;
+import com.silvergruppen.photoblog.other.MonthlyProgress;
+import com.silvergruppen.photoblog.other.WeekleyProgress;
+import com.silvergruppen.photoblog.viewmodels.ProgressViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
 
 
 public class DailyProgressFragment extends Fragment {
 
+    private final static int dailyId=1, weekleyId = 2, monthlyId = 3;
     private static final String DAY_KEY = "day";
     private static final String UID_KEY = "uid";
-    private DailyProgressViewModel viewModel;
+    private static final String TYPE_KEY = "type";
+    private ProgressViewModel viewModel;
     public RecyclerView dailyProgressRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     private DailyProgressRecyclerViewAdapter recycleViewAdapter;
     private Calendar calendar;
-    private TextView dateTextView, progressTextView;
+    private TextView dateTextView, progressTextView, headline;
     //private ProgressBar progressBar;
 
 
@@ -64,11 +58,16 @@ public class DailyProgressFragment extends Fragment {
 
         int day = calendar.get(Calendar.DAY_OF_YEAR);
         String userId = getArguments().getString(UID_KEY);
-        viewModel = ViewModelProviders.of(this).get(DailyProgressViewModel.class);
-        viewModel.init(Integer.toString(day),userId);
+        int type = getArguments().getInt(TYPE_KEY);
+
+        if(type == monthlyId)
+            day = calendar.get(Calendar.MONTH);
+        else if(type == weekleyId)
+            day = calendar.get(Calendar.WEEK_OF_YEAR);
+
+        viewModel = ViewModelProviders.of(this).get(ProgressViewModel.class);
+        viewModel.init(Integer.toString(day),userId, type);
         final ProgressBar progressBar = view.findViewById(R.id.progressbar_daily_progress);
-
-
 
         // Create the observer which updates the UI.
         final Observer<DailyProgress> userObserver = new Observer<DailyProgress>() {
@@ -85,28 +84,67 @@ public class DailyProgressFragment extends Fragment {
             }
         };
 
-        viewModel.getDailyProgress().observe(this,userObserver);
+        final Observer<WeekleyProgress> weekleyObserver = new Observer<WeekleyProgress>() {
+            @Override
+            public void onChanged(@Nullable final WeekleyProgress newWeekleyProgress) {
+                // Update the UI, in this case, a TextView.
+                int numberOfDoneTasks = Integer.parseInt(newWeekleyProgress.getProgress());
+                progressTextView.setText(newWeekleyProgress.getProgress()+"/8");
+                recycleViewAdapter.setWeekleyProgress(newWeekleyProgress);
+                //Log.d("\n \n \n \n \n progress", Integer.toString(numberOfDoneTasks));
+                progressBar.setProgress((int)numberOfDoneTasks);
+                progressBar.setMax(8);
+
+            }
+        };
+
+        final Observer<MonthlyProgress> monthlyObserver = new Observer<MonthlyProgress>() {
+            @Override
+            public void onChanged(@Nullable final MonthlyProgress newWeekleyProgress) {
+                // Update the UI, in this case, a TextView.
+                int numberOfDoneTasks = Integer.parseInt(newWeekleyProgress.getProgress());
+                progressTextView.setText(newWeekleyProgress.getProgress()+"/1");
+                recycleViewAdapter.setMonthlyProgress(newWeekleyProgress);
+                //Log.d("\n \n \n \n \n progress", Integer.toString(numberOfDoneTasks));
+                progressBar.setProgress((int)numberOfDoneTasks);
+                progressBar.setMax(1);
+
+            }
+        };
+
+        if(type == dailyId)
+            viewModel.getDailyProgress().observe(this,userObserver);
+        else if(type == weekleyId)
+            viewModel.getWeekleyProgress().observe(this,weekleyObserver);
+        else if(type == monthlyId)
+            viewModel.getMonthlyProgress().observe(this, monthlyObserver);
 
         dateTextView = view.findViewById(R.id.daily_progrtess_day_text);
         progressTextView = view.findViewById(R.id.progres_text_view);
 
 
-
-
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        if(calendar != null)
-            dateTextView.setText(dateFormat.format(calendar.getTime()));
+        if(calendar != null) {
+            switch (type){
+                case dailyId:
+                    dateTextView.setText(dateFormat.format(calendar.getTime()));
+                    break;
+                case weekleyId:
+                    dateTextView.setText("v."+calendar.get(Calendar.WEEK_OF_YEAR));
+                    break;
+
+                    default:
+                        break;
+            }
+
+        }
 
         MainActivity mainActivity = (MainActivity) getActivity();
         ArrayList<Integer> dailyProgress = mainActivity.getDailyProgressHashMap().get(calendar);
 
         Resources res = getResources();
         Drawable drawable = res.getDrawable(R.drawable.circular_progress_bar);
-        Integer numberOfDoneTasks =0;
-        if(dailyProgress != null) {
-            numberOfDoneTasks = Collections.frequency(dailyProgress,1);
 
-        }
 
 
 
@@ -121,11 +159,28 @@ public class DailyProgressFragment extends Fragment {
 
         mLayoutManager = new LinearLayoutManager(getActivity());
         dailyProgressRecyclerView.setLayoutManager(mLayoutManager);
-        recycleViewAdapter = new DailyProgressRecyclerViewAdapter(getActivity(), viewModel);
+        recycleViewAdapter = new DailyProgressRecyclerViewAdapter(getActivity(), viewModel,type);
         recycleViewAdapter.setCalendar(calendar);
         dailyProgressRecyclerView.setAdapter(recycleViewAdapter);
         recycleViewAdapter.notifyDataSetChanged();
 
+
+        headline = view.findViewById(R.id.daily_progress_headline);
+
+        switch (type){
+
+            case dailyId:
+                headline.setText("DAILY PROGRESS");
+                break;
+            case weekleyId:
+                headline.setText("WEEKLEY PROGRESS");
+                break;
+            case monthlyId:
+                headline.setText("MONTHLY PROGRESS");
+                break;
+                default:
+                    break;
+        }
 
 
         return view;

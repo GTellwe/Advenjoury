@@ -26,10 +26,11 @@ public class CalendarRepository {
         // This isn't an optimal implementation. We'll fix it later.
         final MutableLiveData<int[][]> data = new MutableLiveData<>();
 
+
+
         firebaseFirestore.collection("Users/"+userId+"/DailyAchievements").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
                 if(task.isSuccessful()){
                     int[][] tmpMatrix = new int[365][8];
                     for (DocumentSnapshot document : task.getResult()) {
@@ -45,7 +46,7 @@ public class CalendarRepository {
                         String ach7 = tmpMap.get("No sugar").toString();
                         String ach8 = tmpMap.get("Exercise").toString();
 
-                        //Log.d("results "+ach1+" " +daysInMonth+" "+Integer.parseInt(document.getId()),"\n \n \n \n");
+
                         tmpMatrix[Integer.parseInt(document.getId())-1][0] = Integer.parseInt(ach1);
                         tmpMatrix[Integer.parseInt(document.getId())-1][1] = Integer.parseInt(ach2);
                         tmpMatrix[Integer.parseInt(document.getId())-1][2] = Integer.parseInt(ach3);
@@ -57,6 +58,81 @@ public class CalendarRepository {
 
 
 
+
+                    }
+                    data.setValue(tmpMatrix);
+                }
+
+
+            }
+        });
+        return data;
+    }
+
+    public LiveData<int[][]> getWeekleyDoneAchievements(String userId) {
+        // This isn't an optimal implementation. We'll fix it later.
+        final MutableLiveData<int[][]> data = new MutableLiveData<>();
+
+
+
+        firebaseFirestore.collection("Users/"+userId+"/WeekleyAchievements").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if(task.isSuccessful()){
+                    int[][] tmpMatrix = new int[52][8];
+                    for (DocumentSnapshot document : task.getResult()) {
+
+                        Map<String,Object> tmpMap = document.getData();
+
+                        String ach1 = tmpMap.get("Clean").toString();
+                        String ach2 = tmpMap.get("Socialize").toString();
+                        String ach3 = tmpMap.get("Be creative").toString();
+                        String ach4 = tmpMap.get("Get emotional").toString();
+                        String ach5 = tmpMap.get("Strength").toString();
+                        String ach6 = tmpMap.get("Food").toString();
+                        String ach7 = tmpMap.get("Reading").toString();
+                        String ach8 = tmpMap.get("Think").toString();
+
+
+                        tmpMatrix[Integer.parseInt(document.getId())-1][0] = Integer.parseInt(ach1);
+                        tmpMatrix[Integer.parseInt(document.getId())-1][1] = Integer.parseInt(ach2);
+                        tmpMatrix[Integer.parseInt(document.getId())-1][2] = Integer.parseInt(ach3);
+                        tmpMatrix[Integer.parseInt(document.getId())-1][3] = Integer.parseInt(ach4);
+                        tmpMatrix[Integer.parseInt(document.getId())-1][4] = Integer.parseInt(ach5);
+                        tmpMatrix[Integer.parseInt(document.getId())-1][5] = Integer.parseInt(ach6);
+                        tmpMatrix[Integer.parseInt(document.getId())-1][6] = Integer.parseInt(ach7);
+                        tmpMatrix[Integer.parseInt(document.getId())-1][7] = Integer.parseInt(ach8);
+
+
+
+
+                    }
+                    data.setValue(tmpMatrix);
+                }
+
+
+            }
+        });
+        return data;
+    }
+
+    public LiveData<int[][]> getMonthlyDoneAchievements(String userId) {
+        // This isn't an optimal implementation. We'll fix it later.
+        final MutableLiveData<int[][]> data = new MutableLiveData<>();
+
+
+
+        firebaseFirestore.collection("Users/"+userId+"/MonthlyAchievements").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if(task.isSuccessful()){
+                    int[][] tmpMatrix = new int[12][1];
+                    for (DocumentSnapshot document : task.getResult()) {
+
+                        Map<String,Object> tmpMap = document.getData();
+
+                        String ach1 = tmpMap.get("Save").toString();
+                        tmpMatrix[Integer.parseInt(document.getId())-1][0] = Integer.parseInt(ach1);
 
                     }
                     data.setValue(tmpMatrix);

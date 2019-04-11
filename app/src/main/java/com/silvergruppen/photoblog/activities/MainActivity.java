@@ -1,12 +1,20 @@
 package com.silvergruppen.photoblog.activities;
 
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -22,6 +30,7 @@ import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,6 +60,7 @@ import com.silvergruppen.photoblog.fragments.SearchFragment;
 import com.silvergruppen.photoblog.items.Achievement;
 import com.silvergruppen.photoblog.items.Catagorie;
 import com.silvergruppen.photoblog.items.PostItem;
+import com.silvergruppen.photoblog.other.NotificationPublisher;
 import com.silvergruppen.photoblog.other.User;
 import com.theartofdev.edmodo.cropper.CropImage;
 
@@ -65,206 +75,130 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Toolbar mainToolbar;
-    private ProgressBar progress;
-    //private NavigationView navView;
-    private FirebaseAuth mAuth;
-    private FirebaseFirestore firebaseFirestore;
-
-    private String current_user_id;
-
-    private BottomNavigationView mainBottomNav;
-
-    private StorageReference storageReference;
-
-    private static FragmentManager supportFrameManager;
-
+    // constants
+    private static final String DAY_KEY = "day";
+    private static final String UID_KEY = "uid";
+    private static final String TYPE_KEY = "type";
+    private final static int dailyId=1, weekleyId = 2;
+    public static final int accountFragmentId = 0,calendarFragmentId=2, catogiresFragmentId = 1, homefragmentId=3;
+    public static int displayFramentOnResume = calendarFragmentId;
 
     // fragments
-    //private HomeFragment homeFragment;
-    //private AchievementsFragment2 achievementsFragment;
-    private AccountFragment accountFragment;
+    private CatagoriesFragment catagoriesFragment;
     private CalendarFragment calendarFragment;
-    //private CatagoriesFragment catagoriesFragment;
-    //private AchievementFragment achievementFragment;
     private DailyProgressFragment dailyProgressFragment;
     private AccountSettingsFragment accountSettingsFragment;
+    private AchievementsFragment2 achievementsFragment;
+    private AchievementFragment achievementFragment;
 
-
+    // strings
+    private String current_user_id;
     private String topic, currentAchievement;
+    private String currentUserImageUrl;
 
+    // uri
+    private Uri accountImageUri;
+
+    // views
+    private Toolbar mainToolbar;
+    private ProgressBar progress;
+    private BottomNavigationView mainBottomNav;
     private DrawerLayout mainDrawerLayout;
+    private TextView navigationProfileText;
+    private CircleImageView navigationProfileImage;
+    private ImageView toolbarIcon;
+    private TextView mainToolbarHeadline;
 
-    private Semaphore semaphore;
+    // Firebase
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore firebaseFirestore;
+    private StorageReference storageReference;
 
-
+    // lists
     private ArrayList<Achievement> achievementsList;
-    private HashMap<String, Object> achievementHashmap;
     private ArrayList<User> allUsersID;
     private ArrayList<PostItem> allPostItems;
 
-    private TextView navigationProfileText;
-    private CircleImageView navigationProfileImage;
-
-    private TextView mainToolbarHeadline;
-
-    public static int threads;
-
-    private Context context;
-
+    // hashmaps
+    private HashMap<String, Object> achievementHashmap;
     private HashMap<Calendar,ArrayList<Integer>> dailyProgressHashMap = new HashMap<Calendar, ArrayList<Integer>>();
-    private String currentUserImageUrl;
-
-    private Uri accountImageUri;
 
 
+    // other
+    private static FragmentManager supportFrameManager;
+    private Semaphore semaphore;
     private Context mContext;
 
-    public static final int accountFragmentId = 0,calendarFragmentId=2, catogiresFragmentId = 1, homefragmentId=3;
 
-    public static int displayFramentOnResume = calendarFragmentId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        progress = findViewById(R.id.progressBar_main);
-        mContext = this;
-        threads = 0;
-        changeBottomMenuIconSize();
-        achievementHashmap = new HashMap<>();
-        context = this;
-
-        allPostItems = new ArrayList<>();
-        allUsersID = new ArrayList<>();
-        // Initialize fragments
-        //homeFragment = new HomeFragment();
-       // achievementsFragment = new AchievementsFragment2();
-        accountFragment = new AccountFragment();
-        calendarFragment = new CalendarFragment();
-        //catagoriesFragment = new CatagoriesFragment();
-        //achievementFragment = new AchievementFragment();
-        dailyProgressFragment = new DailyProgressFragment();
-        accountSettingsFragment = new AccountSettingsFragment();
-
-
-        accountFragment.setAchievemensDoneList(new ArrayList<Achievement>());
 
 
 
-        mainDrawerLayout = findViewById(R.id.main_drawer_layout);
-        //navView = mainDrawerLayout.findViewById(R.id.nav_view);
-        //View navHead = navView.getHeaderView(0);
-        //navigationProfileImage = navHead.findViewById(R.id.nav_profile_image);
-        //navigationProfileText = navHead.findViewById(R.id.nav_profile_text);
-
-        mainToolbar = (Toolbar) findViewById(R.id.main_toolbar);
-        setSupportActionBar(mainToolbar);
-        getSupportActionBar().setTitle(null);
-
-        mainToolbarHeadline = findViewById(R.id.main_toolbar_headline);
-        mainToolbarHeadline.setText("HOME");
-
-
+        // setup firebase
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
         storageReference = FirebaseStorage.getInstance().getReference();
-
-        supportFrameManager = getSupportFragmentManager();
-
-        // create the list of daily achievements
-
-
-
-/*
-        navView = findViewById(R.id.nav_view);
-
-        if(mAuth.getCurrentUser() != null) {
-
-            //Get the topics from Firebase and show in nav view
-            final Menu navMenu = navView.getMenu();
-            firebaseFirestore.collection("Topics")
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                for (DocumentSnapshot document : task.getResult()) {
-                                    navMenu.add(document.getId());
-                                }
-                            } else {
-
-                            }
-                        }
-                    });
-
-*/
-
-            mainBottomNav = findViewById(R.id.main_bottom_nav);
-
-            //fragments
-
-            replaceFragment(displayFramentOnResume);
-/*
-            // Create the on navigationView Item listener
-            navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                    achievementsFragment.changeTopic(menuItem.getTitle().toString());
-                    topic = menuItem.getTitle().toString();
-                    refreshFragment(achievementsFragment);
-                    return true;
-                }
-            });
-
-*/
-
-            mainBottomNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-
-                    switch (menuItem.getItemId()) {
-
-                        /*case R.id.bottom_action_home:
-                            replaceFragment(homeFragment);
-                            return true;
-                        case R.id.bottom_action_achievement:
-                            replaceFragment(catagoriesFragment);
-                            return true;*/
-                        case R.id.bottom_action_account:
-                            Log.d("Action account","\n \n ");
-                            replaceFragment(accountFragmentId);
-                            return true;
-                        case R.id.bottom_action_daily_progress:
-                            Log.d("Action daily","\n \n ");
-                            replaceFragment(calendarFragmentId);
-                            return true;
-                            /*
-                        case R.id.bottom_action_search:
-
-                            Intent searchIntent = new Intent(MainActivity.this, SearchActivity.class);
-                            startActivity(searchIntent);
-*/
-                        default:
-                            return false;
-
-                    }
-                }
-            });
-
-
-
-
-       // }
-
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+
+
         if(currentUser == null){
 
             sendToLogin();
 
         } else {
 
+            // initialize views
+            progress = findViewById(R.id.progressBar_main);
+            mainDrawerLayout = findViewById(R.id.main_drawer_layout);
+            mainToolbar = (Toolbar) findViewById(R.id.main_toolbar);
+            mainToolbarHeadline = findViewById(R.id.main_toolbar_headline);
+
+            // initialize lists
+            allPostItems = new ArrayList<>();
+            allUsersID = new ArrayList<>();
+
+            // Initialize fragments
+            calendarFragment = new CalendarFragment();
+            dailyProgressFragment = new DailyProgressFragment();
+            accountSettingsFragment = new AccountSettingsFragment();
+            catagoriesFragment = new CatagoriesFragment();
+            achievementsFragment = new AchievementsFragment2();
+            achievementFragment = new AchievementFragment();
+
+            // other initializations
+            mContext = this;
+            achievementHashmap = new HashMap<>();
+
+            changeBottomMenuIconSize();
+
+            // setup action bar
+            setSupportActionBar(mainToolbar);
+            getSupportActionBar().setTitle(null);
+
+            // get user id
             current_user_id = mAuth.getCurrentUser().getUid();
 
+            // change the headline
+            mainToolbarHeadline.setText("CALENDAR");
+
+            // setup support frame manager
+            supportFrameManager = getSupportFragmentManager();
+
+            // setup notifications
+            scheduleNotification(getNotification("Don't forget your daily achievements"));
+
+            // show calendar fragment
+            Bundle bundle2 = new Bundle();
+            bundle2.putString("uid",current_user_id);
+            calendarFragment.setArguments(bundle2);
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.main_container, calendarFragment);
+            fragmentTransaction.commit();
 
             firebaseFirestore.collection("Users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
@@ -295,14 +229,35 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
+
+            // set up the bottom nativation view
+            mainBottomNav = findViewById(R.id.main_bottom_nav);
+            mainBottomNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+
+                    switch (menuItem.getItemId()) {
+
+                        case R.id.bottom_action_achievement:
+                            replaceFragment(catagoriesFragment);
+                            return true;
+                        case R.id.bottom_action_daily_progress:
+                            Log.d("Action daily","\n \n ");
+                            replaceFragment(calendarFragmentId);
+                            return true;
+                        default:
+                            return false;
+
+                    }
+                }
+            });
         }
     }
 
-
     @Override
     protected void onStart() {
-        replaceFragment(displayFramentOnResume);
-        Toast.makeText(this,"start", Toast.LENGTH_LONG).show();
+        //replaceFragment(displayFramentOnResume);
+        //Toast.makeText(this,"start", Toast.LENGTH_LONG).show();
         super.onStart();
 
 
@@ -311,7 +266,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void changeBottomMenuIconSize() {
-
         BottomNavigationView bottomNavigation = (BottomNavigationView) findViewById(R.id.main_bottom_nav);
 
         BottomNavigationMenuView menuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
@@ -320,11 +274,13 @@ public class MainActivity extends AppCompatActivity {
             final View iconView = menuView.getChildAt(i).findViewById(android.support.design.R.id.icon);
             final ViewGroup.LayoutParams layoutParams = iconView.getLayoutParams();
             final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-            layoutParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, displayMetrics);
-            layoutParams.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, displayMetrics);
+            layoutParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, displayMetrics);
+            layoutParams.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, displayMetrics);
             iconView.setLayoutParams(layoutParams);
 
         }
+
+
     }
 
 
@@ -347,8 +303,11 @@ public class MainActivity extends AppCompatActivity {
                 logOut();
                 return true;
             case R.id.action_setting_btn:
+                // set alarm for notification
 
-                replaceFragment(accountSettingsFragment);
+                //scheduleNotification(getNotification("Don't forget your daily achievements"), 3000);
+
+                //replaceFragment(accountSettingsFragment);
                 /*
                 Intent settingsIntent = new Intent(MainActivity.this, SetupActivity.class);
                 startActivity(settingsIntent);
@@ -386,6 +345,47 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void scheduleNotification(Notification notification) {
+
+        Intent notificationIntent = new Intent(this, NotificationPublisher.class);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Set the alarm to start at approximately 2:00 p.m.
+        /*Calendar tmpCal = Calendar.getInstance();
+        tmpCal.setTimeInMillis(System.currentTimeMillis());
+        tmpCal.set(Calendar.HOUR_OF_DAY, 18);
+        */long futureInMillis = SystemClock.elapsedRealtime() + 5000;
+
+        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+        //alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, tmpCal.getTimeInMillis(),
+         //       1000 * 60 * 20, pendingIntent);
+    }
+    private Notification getNotification(String content) {
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setContentTitle("Reminder");
+        builder.setContentText(content);
+        builder.setSmallIcon(R.drawable.logotransparent);
+
+        NotificationManager mNotificationManager =
+                (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = "YOUR_CHANNEL_ID";
+            NotificationChannel channel = new NotificationChannel(channelId,
+                    "Channel human readable title",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            mNotificationManager.createNotificationChannel(channel);
+            builder.setChannelId(channelId);
+        }
+
+
+        return builder.build();
+    }
+
+
     public int getAchievementsDoneByCurrentUser(Catagorie catagorie){
 
         int achievementsDone = 0;
@@ -414,23 +414,24 @@ public class MainActivity extends AppCompatActivity {
         this.dailyProgressHashMap = dailyProgressHashMap;
     }
 
-    public void startDailyProgressFragment(Calendar calendar){
+    public void startDailyProgressFragment(Calendar calendar, int type){
 
         dailyProgressFragment.setCalendar(calendar);
 
         Bundle bundle = new Bundle();
-        bundle.putString("uid",current_user_id);
+        bundle.putString(UID_KEY,current_user_id);
+        bundle.putInt(TYPE_KEY,type);
         dailyProgressFragment.setArguments(bundle);
         replaceFragment(dailyProgressFragment);
     }
 
     public void startAchievementFragment(Catagorie catagorie){
-/*
+
 
         mainToolbarHeadline.setText(catagorie.getName().toUpperCase());
         achievementsFragment.setCurrentCatagorie(catagorie);
         replaceFragment(achievementsFragment);
-        */
+
     }
 
     public void setHeadline(String headline){
@@ -439,15 +440,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startAchievementActivity(Achievement achievement){
-        /*
+
 
         // clear all journal items
-        achievementFragment.clearAllJournalItems();
-        achievementFragment.setAchievement(achievement);
 
         setHeadline(achievement.getName());
 
-
+        /*
         // Load all post items into the jorunal
         for(PostItem tmpPostItem : allPostItems){
 
@@ -457,20 +456,26 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
-       replaceFragment(achievementFragment);
+        */
+        Bundle bundle2 = new Bundle();
+        bundle2.putString("uid",current_user_id);
+        achievementFragment.setArguments(bundle2);
+        achievementFragment.setAchievement(achievement);
+        replaceFragment(achievementFragment);
         // Intent achievementIntent = new Intent(MainActivity.this, AchievementActivity.class);
         //startActivity(achievementIntent);
         //startActivity(achievementIntent);
-        */
+
     }
     public void loadAllUserData(){
 
-        loadAchievements();
-        loadNameAndProfilePicture();
-        loadAllusers();
-        loadNUmberOfPosts();
-        loadNumberOfFollowers();
-        loadCatagories();
+        //loadAchievements();
+        //loadNameAndProfilePicture();
+        //loadAllusers();
+        //loadNUmberOfPosts();
+       // loadNumberOfFollowers();
+
+        //loadCatagories();
 
     }
     private void logOut(){
@@ -499,6 +504,7 @@ public class MainActivity extends AppCompatActivity {
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.main_container, fragment);
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
 
     }
@@ -506,7 +512,7 @@ public class MainActivity extends AppCompatActivity {
     public void replaceFragment(int fragmentId){
 
         switch (fragmentId){
-
+            /*
             case accountFragmentId:
                 Bundle bundle = new Bundle();
                 bundle.putString("uid",current_user_id);
@@ -514,7 +520,7 @@ public class MainActivity extends AppCompatActivity {
                 accountFragment.setArguments(bundle);
                 replaceFragment(accountFragment);
                 break;
-                /*
+
             case homefragmentId:
                 replaceFragment(homeFragment);
             case catogiresFragmentId:
@@ -554,13 +560,13 @@ public class MainActivity extends AppCompatActivity {
         this.currentAchievement = currentAchievement;
     }
     private void loadingTaskDone(){
-
+        /*
         if(threads ==0) {
             progress.setVisibility(View.INVISIBLE);
 
         }
 
-
+/
     }
 
     public void loadAchievements(){
@@ -673,6 +679,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 */
+
     }
 
     public void loadNameAndProfilePicture(){
@@ -680,7 +687,8 @@ public class MainActivity extends AppCompatActivity {
         /**
          * Load name and profile picture of user
          */
-        threads++;
+        /*
+        //threads++;
         progress.setVisibility(View.VISIBLE);
         firebaseFirestore.collection("Users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -694,19 +702,20 @@ public class MainActivity extends AppCompatActivity {
                         String name = tmpMap.get("name").toString();
                         String image = tmpMap.get("image").toString();
 
-                        AccountFragment.setUserName(name);
-                        AccountFragment.setImageURL(image);
+                        //AccountFragment.setUserName(name);
+                        //AccountFragment.setImageURL(image);
+
                         accountSettingsFragment.setImageURL(image);
                         accountSettingsFragment.setUserName(name);
                         currentUserImageUrl = image;
 
                         // loaf the image and name into the drawer layout
-                       /* RequestOptions placeholderRequest = new RequestOptions();
+                       RequestOptions placeholderRequest = new RequestOptions();
                         placeholderRequest.placeholder(R.drawable.profile_icon);
                         Glide.with(context).setDefaultRequestOptions(placeholderRequest).load(image).into(navigationProfileImage);
 
                         navigationProfileText.setText(name);
-*/
+
 
                     }
                 } else {
@@ -715,18 +724,19 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(mContext, "FIRESTORE retrive Error: "+errorMessage,Toast.LENGTH_LONG).show();
 
                 }
-                threads--;
+                //threads--;
                 loadingTaskDone();
 
 
             }
         });
+*/
 
     }
     public  void loadAchievmentsDone(){
 
         // Load all the achievements done by user
-        accountFragment.getAchievemensDoneList().clear();
+        //accountFragment.getAchievemensDoneList().clear();
         firebaseFirestore.collection("Users/"+current_user_id+"/Achievements").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -737,7 +747,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                         String achievementName = doc.getId();
-                        accountFragment.addAchievementDone((Achievement) achievementHashmap.get(achievementName));
+                        //accountFragment.addAchievementDone((Achievement) achievementHashmap.get(achievementName));
 
                     }
 
@@ -749,7 +759,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadAllusers(){
-
+/*
         threads++;
         progress.setVisibility(View.VISIBLE);
         allUsersID.clear();
@@ -776,6 +786,7 @@ public class MainActivity extends AppCompatActivity {
                 loadingTaskDone();
             }
         });
+        */
     }
 
     public void loadPostItems(){
@@ -842,7 +853,7 @@ public class MainActivity extends AppCompatActivity {
         */
     }
     public void loadNUmberOfPosts(){
-
+/*
             threads++;
             progress.setVisibility(View.VISIBLE);
 
@@ -851,17 +862,18 @@ public class MainActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
                     if (task.isSuccessful())
-                        accountFragment.setNumberOFPosts(task.getResult().size());
+                       // accountFragment.setNumberOFPosts(task.getResult().size());
 
                     threads--;
                     loadingTaskDone();
                 }
             });
+            */
 
     }
 
     public void loadNumberOfFollowers(){
-
+        /*
         threads++;
         progress.setVisibility(View.VISIBLE);
 
@@ -870,18 +882,19 @@ public class MainActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
                 if (task.isSuccessful())
-                    accountFragment.setNumberOfFollowers(task.getResult().size());
+                    //accountFragment.setNumberOfFollowers(task.getResult().size());
 
                 threads--;
                 loadingTaskDone();
 
             }
         });
+        */
 
     }
 
     private void loadCatagories(){
-        /*
+
 
         //Get the topics from Firebase and show in nav view
         firebaseFirestore.collection("Topics")
@@ -914,11 +927,11 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
-                */
+
     }
 
     public void setAchievementDoneInfireBase(Boolean done, final Achievement achievementItem){
-
+/*
 
         final String currentUserID= mAuth.getCurrentUser().getUid();
         firebaseFirestore = FirebaseFirestore.getInstance();
@@ -941,7 +954,7 @@ public class MainActivity extends AppCompatActivity {
                                         @Override
                                         public void onSuccess(Void aVoid) {
 
-                                            Toast.makeText(context,"Achievement marked as done",Toast.LENGTH_LONG).show();
+                                            Toast.makeText(mContext,"Achievement marked as done",Toast.LENGTH_LONG).show();
                                             achievementItem.setDone(true);
                                         }
                                     });
@@ -961,7 +974,7 @@ public class MainActivity extends AppCompatActivity {
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void aVoid) {
-                                            Toast.makeText(context,"Achievement marked as not done",Toast.LENGTH_LONG).show();
+                                            Toast.makeText(mContext,"Achievement marked as not done",Toast.LENGTH_LONG).show();
                                             achievementItem.setDone(false);
                                         }
                                     });
@@ -972,7 +985,7 @@ public class MainActivity extends AppCompatActivity {
                     });
 
 
-        }
+        }*/
 
     }
 
