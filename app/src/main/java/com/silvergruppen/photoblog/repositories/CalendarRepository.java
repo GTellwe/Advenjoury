@@ -10,57 +10,73 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
+import com.silvergruppen.photoblog.items.Achievement;
 import com.silvergruppen.photoblog.other.User;
 
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Map;
 
 public class CalendarRepository {
 
+    private final String DAILY_KEY = "DailyAchievements";
+    private final String WEEKLY_KEY = "WeekleyAchievements";
+    private final String MONTHLY_KEY = "MonthlyAchievements";
+
+
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
 
-    public LiveData<int[][]> getDoneAchievements(String userId) {
-        // This isn't an optimal implementation. We'll fix it later.
-        final MutableLiveData<int[][]> data = new MutableLiveData<>();
+    public LiveData<HashMap<String, ArrayList<Achievement>>> getCalendarAchievements(String userId, final String achievementType) {
 
-
-
-        firebaseFirestore.collection("Users/"+userId+"/DailyAchievements").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        final MutableLiveData<HashMap<String, ArrayList<Achievement>>> data = new MutableLiveData<>();
+        firebaseFirestore.collection("Users/"+userId+"/"+achievementType).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if(task.isSuccessful()){
-                    int[][] tmpMatrix = new int[365][8];
+
+                    HashMap<String, ArrayList<Achievement>> achievementList = new HashMap<>();
                     for (DocumentSnapshot document : task.getResult()) {
 
+                        ArrayList<Achievement> tmpList = new ArrayList<>();
                         Map<String,Object> tmpMap = document.getData();
+                        for(HashMap.Entry<String, Object> entry : tmpMap.entrySet()){
 
-                        String ach1 = tmpMap.get("Meditate").toString();
-                        String ach2 = tmpMap.get("Selfie").toString();
-                        String ach3 = tmpMap.get("Writing").toString();
-                        String ach4 = tmpMap.get("Get emotional").toString();
-                        String ach5 = tmpMap.get("Gratitude").toString();
-                        String ach6 = tmpMap.get("Fresh air").toString();
-                        String ach7 = tmpMap.get("No sugar").toString();
-                        String ach8 = tmpMap.get("Exercise").toString();
-
-
-                        tmpMatrix[Integer.parseInt(document.getId())-1][0] = Integer.parseInt(ach1);
-                        tmpMatrix[Integer.parseInt(document.getId())-1][1] = Integer.parseInt(ach2);
-                        tmpMatrix[Integer.parseInt(document.getId())-1][2] = Integer.parseInt(ach3);
-                        tmpMatrix[Integer.parseInt(document.getId())-1][3] = Integer.parseInt(ach4);
-                        tmpMatrix[Integer.parseInt(document.getId())-1][4] = Integer.parseInt(ach5);
-                        tmpMatrix[Integer.parseInt(document.getId())-1][5] = Integer.parseInt(ach6);
-                        tmpMatrix[Integer.parseInt(document.getId())-1][6] = Integer.parseInt(ach7);
-                        tmpMatrix[Integer.parseInt(document.getId())-1][7] = Integer.parseInt(ach8);
-
-
-
+                            boolean done = false;
+                            if(entry.getValue() == "1")
+                                done = true;
+                            tmpList.add(new Achievement(entry.getKey(),null, null,done, null));
+                        }
+                        achievementList.put(document.getId(),tmpList);
 
                     }
-                    data.setValue(tmpMatrix);
+                    // if the current day dosent exist: take the latest day there was a list or leave it to be null
+                    int achievementKey;
+                    switch (achievementType){
+
+                        case DAILY_KEY: achievementKey = Calendar.DAY_OF_YEAR;
+                            break;
+                        case WEEKLY_KEY: achievementKey = Calendar.WEEK_OF_YEAR;
+                            break;
+                        default: achievementKey =0;
+                            break;
+                    }
+                    if (achievementList.get(Integer.toString(Calendar.getInstance().get(achievementKey))) == null) {
+                        // check if some previous day has achievement
+                        int currentDay = Calendar.getInstance().get(achievementKey);
+                        while (currentDay >0){
+                            if(achievementList.get(Integer.toString(currentDay)) != null){
+                               achievementList.put(Integer.toString(Calendar.getInstance().get(achievementKey)),achievementList.get(Integer.toString(currentDay)));
+                                break;
+                            }else
+                                currentDay --;
+                        }
+
+                    }
+                    data.setValue(achievementList);
                 }
 
 
@@ -142,6 +158,27 @@ public class CalendarRepository {
             }
         });
         return data;
+    }
+
+    public void uppdateCurrentAchievementList(String userId,ArrayList<Achievement> achievementsList,String achievementType){
+
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        Map<String, Object> data = new HashMap<>();
+
+        for(Achievement achievement : achievementsList)
+            data.put(achievement.getName(), "0");
+        int achievementKey;
+        switch (achievementType){
+
+            case DAILY_KEY: achievementKey = Calendar.DAY_OF_YEAR;
+                break;
+            case WEEKLY_KEY: achievementKey = Calendar.WEEK_OF_YEAR;
+                break;
+            default: achievementKey =0;
+            break;
+        }
+        firebaseFirestore.collection("Users/" + userId + "/" + achievementType).document(Integer.toString(Calendar.getInstance().get(achievementKey))).set(data);
+
     }
 
 }

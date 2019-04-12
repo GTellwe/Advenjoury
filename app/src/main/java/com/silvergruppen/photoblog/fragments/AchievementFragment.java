@@ -80,14 +80,19 @@ public class AchievementFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.activity_achievement, container, false);
         String userId = getArguments().getString(UID_KEY);
+
+        // update achievement and user id on the child fragments
         journalFragment.setUserId(userId);
         journalFragment.setAchievement(achievement);
+        settingsFragment.setAchievement(achievement);
+        settingsFragment.setUserId(userId);
 
+        // set up the view pager and tab layout
         viewPager = (ViewPager) view.findViewById(R.id.achievement_view_pager);
         setupViewPager(viewPager);
-
         tabLayout = (TabLayout) view.findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
+
         return view;
     }
     @Override

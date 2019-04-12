@@ -123,7 +123,7 @@ public class CalendarGridViewAdapter extends BaseAdapter {
             }
 
             convertView.setTag(holder);
-
+/*
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -133,14 +133,14 @@ public class CalendarGridViewAdapter extends BaseAdapter {
                     MainActivity mainActivity = (MainActivity) context;
                     mainActivity.startDailyProgressFragment(calendarItem.getCalendar(),dailyId);
                     */
-
+/*
                     calendarFragment.zoomImageFromThumb(view, R.drawable.icon);
                     // Retrieve and cache the system's default "short" animation time.
 
 
                 }
             });
-
+*/
 
         return convertView;
     }

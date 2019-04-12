@@ -101,7 +101,7 @@ public class WeekleyGridViewAdapter extends BaseAdapter {
 
 
         convertView.setTag(holder);
-
+/*
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -114,7 +114,7 @@ public class WeekleyGridViewAdapter extends BaseAdapter {
 
             }
         });
-
+*/
 
         return convertView;
     }
