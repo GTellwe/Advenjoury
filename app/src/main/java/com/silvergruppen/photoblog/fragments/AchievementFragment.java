@@ -86,6 +86,8 @@ public class AchievementFragment extends Fragment {
         journalFragment.setAchievement(achievement);
         settingsFragment.setAchievement(achievement);
         settingsFragment.setUserId(userId);
+        howtoFragment.setUserId(userId);
+        howtoFragment.setAchievement(achievement);
 
         // set up the view pager and tab layout
         viewPager = (ViewPager) view.findViewById(R.id.achievement_view_pager);

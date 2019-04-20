@@ -4,9 +4,11 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.silvergruppen.photoblog.R;
 import com.silvergruppen.photoblog.items.Achievement;
 
 public class CalendarRecyclerViewHolder extends RecyclerView.ViewHolder {
@@ -15,6 +17,7 @@ public class CalendarRecyclerViewHolder extends RecyclerView.ViewHolder {
 
     private CheckBox aSwitch;
     private TextView  nameTextView;
+    private ImageView removeAchievementButton ;
     public CalendarRecyclerViewHolder(ConstraintLayout v) {
 
         super(v);
@@ -22,7 +25,7 @@ public class CalendarRecyclerViewHolder extends RecyclerView.ViewHolder {
         //LinearLayout lin1 = (LinearLayout) v.getChildAt(0);
         //final LinearLayout constraintLayout = (LinearLayout) lin1.getChildAt(0);
         //final LinearLayout linearLayout2 = (LinearLayout) lin1.getChildAt(1);
-
+        removeAchievementButton = v.findViewById(R.id.remove_achievement_button);
         aSwitch = (CheckBox) v.getChildAt(2);
         nameTextView = (TextView) v.getChildAt(1);
 
@@ -51,5 +54,7 @@ public class CalendarRecyclerViewHolder extends RecyclerView.ViewHolder {
         this.aSwitch = aSwitch;
     }
 
-
+    public ImageView getRemoveAchievementButton() {
+        return removeAchievementButton;
+    }
 }

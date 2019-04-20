@@ -96,7 +96,7 @@ public class CalendarFragment extends Fragment {
     private int shortAnimationDuration = 200;
     private Animator currentAnimator;
     private CalendarAcievementsRecyclerViewAdapter recycleViewAdapter;
-    private ProgressViewModel viewModel;
+    private String currentVisibleAchievementList;
 
     // Strings
     private String userId;
@@ -240,7 +240,7 @@ public class CalendarFragment extends Fragment {
 
         mLayoutManager = new LinearLayoutManager(getActivity());
         achievementsRecyclerView.setLayoutManager(mLayoutManager);
-        recycleViewAdapter = new CalendarAcievementsRecyclerViewAdapter(getActivity());
+        recycleViewAdapter = new CalendarAcievementsRecyclerViewAdapter(getActivity(), this);
         recycleViewAdapter.setItems(dailyList);
         achievementsRecyclerView.setAdapter(recycleViewAdapter);
         recycleViewAdapter.notifyDataSetChanged();
@@ -250,6 +250,7 @@ public class CalendarFragment extends Fragment {
             public void onClick(View view) {
                 recycleViewAdapter.setItems(dailyList);
                 recycleViewAdapter.notifyDataSetChanged();
+                currentVisibleAchievementList = DAILY_KEY;
                 zoomImageFromThumb(view, R.drawable.icon);
             }
         });
@@ -259,6 +260,7 @@ public class CalendarFragment extends Fragment {
             public void onClick(View view) {
                 recycleViewAdapter.setItems(weeklyList);
                 recycleViewAdapter.notifyDataSetChanged();
+                currentVisibleAchievementList = WEEKLY_KEY;
                 zoomImageFromThumb(view, R.drawable.icon);
             }
         });
@@ -268,6 +270,7 @@ public class CalendarFragment extends Fragment {
             public void onClick(View view) {
                 recycleViewAdapter.setItems(monthlyList);
                 recycleViewAdapter.notifyDataSetChanged();
+                currentVisibleAchievementList = MONTHLY_KEY;
                 zoomImageFromThumb(view, R.drawable.icon);
             }
         });
@@ -501,52 +504,8 @@ public class CalendarFragment extends Fragment {
         return tmpList;
 
     }
-/*
-    private void uppdateAchievementList(HashMap<String, ArrayList<Achievement>> newDoneMatrix, String achievementType) {
 
-        int achievementKey;
-        switch (achievementType){
-
-            case DAILY_KEY: achievementKey = Calendar.DAY_OF_YEAR;
-                break;
-            case WEEKLY_KEY: achievementKey = Calendar.WEEK_OF_YEAR;
-                break;
-            default: achievementKey =0;
-                break;
-        }
-        if (newDoneMatrix.get(Integer.toString(Calendar.getInstance().get(achievementKey))) == null) {
-            // check if some previous day has achievement
-            int currentDay = Calendar.getInstance().get(achievementKey);
-            while (currentDay >0){
-                if(newDoneMatrix.get(Integer.toString(currentDay)) != null){
-                    if(achievementType.equals(DAILY_KEY)) {
-
-                        dailyList = newDoneMatrix.get(Integer.toString(currentDay));
-                        calendarViewModel.uppdateCurrentAchievementList(userId, dailyList, achievementType);
-                    }else{
-                        weeklyList = newDoneMatrix.get(Integer.toString(currentDay));
-                        calendarViewModel.uppdateCurrentAchievementList(userId, weeklyList, achievementType);
-
-                    }
-                    break;
-                }else
-                    currentDay --;
-            }
-
-        }else{
-
-            if(achievementType.equals(DAILY_KEY)) {
-
-                dailyList = newDoneMatrix.get(Integer.toString(Calendar.getInstance().get(achievementKey)));
-                calendarViewModel.uppdateCurrentAchievementList(userId, dailyList, achievementType);
-            }else{
-                weeklyList = newDoneMatrix.get(Integer.toString(Calendar.getInstance().get(achievementKey)));
-                calendarViewModel.uppdateCurrentAchievementList(userId, weeklyList, achievementType);
-
-            }
-
-        }
+    public void removeAchievement(String achievementName){
+        calendarViewModel.removeAchievement(userId,achievementName, currentVisibleAchievementList);
     }
-    */
-
 }

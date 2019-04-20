@@ -15,34 +15,37 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Achievement extends RecycleListItem{
+
+    // views
+    View view;
+
+    // strings
     private String points;
-    private AchievementListViewHolder holder;
-    private boolean open;
     private String topic;
+    private String catagorie;
+    private String desc;
+
+    // booleans
+    private boolean open;
+    private boolean[] dailyProgressDone = new boolean[365];
+    private boolean done;
+
+    // constants
     private final int expandedHeight = 800, collapsedHeight = 300;
     private int currentHeight = 300;
 
+    // lists
     private ArrayList<PostItem> postList;
-
     private HashMap<Object,Date> postHashMap;
+    private ArrayList<Achievement> childAchievements;
 
+    // other
+    private AchievementListViewHolder holder;
     private MyRecyclerViewHolder recyclerHolder;
-
-    private boolean[] dailyProgressDone = new boolean[365];
-
-    private boolean done;
-
-    private String catagorie;
-
-    private String desc;
-
-
-
-
     private FirebaseAuth firebaseAuth;
     private FirebaseFirestore firebaseFirestore;
-
-
+    private Achievement parentAchievement;
+    private int treeLevel;
 
 
     public Achievement(String name,String topic, String points, boolean done, String catagorie) {
@@ -69,6 +72,15 @@ public class Achievement extends RecycleListItem{
         this.desc = desc;
         open = false;
 
+    }
+    public Achievement(String name){
+        super(name);
+
+    }
+    public Achievement(String name, ArrayList<Achievement> children, View view){
+        super(name);
+        childAchievements = children;
+        this.view = view;
     }
 /*
     public Achievement(String name,String topic, String points, int collapsedHeight, int expandedHeight, int currentHeight, boolean done) {
@@ -238,5 +250,37 @@ public class Achievement extends RecycleListItem{
             return Color.GREEN;
         else
             return  Color.WHITE;
+    }
+
+    public ArrayList<Achievement> getChildAchievements() {
+        return childAchievements;
+    }
+
+    public void setChildAchievements(ArrayList<Achievement> childAchievements) {
+        this.childAchievements = childAchievements;
+    }
+
+    public Achievement getParentAchievement() {
+        return parentAchievement;
+    }
+
+    public void setParentAchievement(Achievement parentAchievement) {
+        this.parentAchievement = parentAchievement;
+    }
+
+    public View getView() {
+        return view;
+    }
+
+    public void setView(View view) {
+        this.view = view;
+    }
+
+    public int getTreeLevel() {
+        return treeLevel;
+    }
+
+    public void setTreeLevel(int treeLevel) {
+        this.treeLevel = treeLevel;
     }
 }

@@ -8,6 +8,7 @@ import android.util.Log;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
@@ -178,6 +179,37 @@ public class CalendarRepository {
             break;
         }
         firebaseFirestore.collection("Users/" + userId + "/" + achievementType).document(Integer.toString(Calendar.getInstance().get(achievementKey))).set(data);
+
+    }
+
+    public void removeAchievement(String userId, String achievementName, String achievementType,ArrayList<Achievement> currentAchievementList){
+
+        // copy all items except the one to be removed to the data map
+        Log.d("\n \n \n jsjs"," "+ currentAchievementList.size());
+        Map<String,Object> updates = new HashMap<>();
+        for(Achievement achievement : currentAchievementList){
+            if(!achievement.getName().equals(achievementName)){
+                String done = "0";
+                if(achievement.isDone())
+                    done= "1";
+
+                updates.put(achievement.getName(), done);
+            }
+
+        }
+        // uppdate the document
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        int achievementKey;
+        switch (achievementType){
+
+            case DAILY_KEY: achievementKey = Calendar.DAY_OF_YEAR;
+                break;
+            case WEEKLY_KEY: achievementKey = Calendar.WEEK_OF_YEAR;
+                break;
+            default: achievementKey =0;
+                break;
+        }
+        firebaseFirestore.collection("Users/"+userId+"/"+achievementType).document(Integer.toString(Calendar.getInstance().get(achievementKey))).set(updates);
 
     }
 

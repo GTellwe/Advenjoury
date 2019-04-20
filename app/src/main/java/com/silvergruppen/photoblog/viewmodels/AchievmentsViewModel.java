@@ -21,16 +21,21 @@ public class AchievmentsViewModel extends ViewModel {
         achievementrRepo = new AchievementsRepository();
     }
 
-    public void init() {
+    public void init(String userId) {
         if (this.achievementsList != null){
             // ViewModel is created on a per-Fragment basis, so the userId
             // doesn't change.
             return;
         }
-        achievementsList = achievementrRepo.getAchievements();
+        achievementsList = achievementrRepo.getAchievements(userId);
     }
     public LiveData<ArrayList<RecycleListItem>> getAchievementsList() {
         return this.achievementsList;
+    }
+
+    public void  addAchievementToList(String userId,String achievementName, String topic){
+
+        achievementrRepo.addAchievementToFirebase(userId, achievementName, topic);
     }
 
 }

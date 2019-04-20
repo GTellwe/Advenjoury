@@ -430,6 +430,10 @@ public class MainActivity extends AppCompatActivity {
 
         mainToolbarHeadline.setText(catagorie.getName().toUpperCase());
         achievementsFragment.setCurrentCatagorie(catagorie);
+        Bundle bundle = new Bundle();
+        bundle.putString("top",catagorie.getName());
+        bundle.putString("uid", current_user_id);
+        achievementsFragment.setArguments(bundle);
         replaceFragment(achievementsFragment);
 
     }

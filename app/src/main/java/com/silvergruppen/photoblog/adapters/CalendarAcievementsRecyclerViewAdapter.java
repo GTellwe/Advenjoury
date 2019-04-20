@@ -18,6 +18,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.silvergruppen.photoblog.R;
 import com.silvergruppen.photoblog.activities.MainActivity;
 import com.silvergruppen.photoblog.animations.ResizeAnimation;
+import com.silvergruppen.photoblog.fragments.CalendarFragment;
 import com.silvergruppen.photoblog.holders.CalendarRecyclerViewHolder;
 import com.silvergruppen.photoblog.holders.MyRecyclerViewHolder;
 import com.silvergruppen.photoblog.items.Achievement;
@@ -31,11 +32,19 @@ import java.util.Calendar;
 
 public class CalendarAcievementsRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRecyclerViewHolder> {
 
+
+    // lists
     private ArrayList<Achievement> items;
-    private Context context;
+
+    // firebase
     private FirebaseAuth firebaseAuth;
     private FirebaseFirestore firebaseFirestore;
+
+    // strings
     private String user_id;
+
+    // other
+    private Context context;
     private MainActivity mainActivity;
     private Calendar calendar;
     private DailyProgress dailyProgress;
@@ -43,17 +52,21 @@ public class CalendarAcievementsRecyclerViewAdapter extends RecyclerView.Adapter
     private WeekleyProgress weekleyProgress;
     private MonthlyProgress monthlyProgress;
     private final static int dailyId=1, weekleyId = 2, monthlyId = 3;
+    private CalendarFragment fragment;
 
 
-    public CalendarAcievementsRecyclerViewAdapter(Context context) {
+    public CalendarAcievementsRecyclerViewAdapter(Context context, CalendarFragment fragment) {
 
         items = new ArrayList<>();
         this.context = context;
         firebaseFirestore = FirebaseFirestore.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
         user_id = firebaseAuth.getCurrentUser().getUid();
+
         if(context.getClass() == MainActivity.class)
             mainActivity = (MainActivity) context;
+
+        this.fragment = fragment;
 
 
     }
@@ -74,11 +87,19 @@ public class CalendarAcievementsRecyclerViewAdapter extends RecyclerView.Adapter
 
 
     @Override
-    public void onBindViewHolder( CalendarRecyclerViewHolder holder,  final int position) {
+    public void onBindViewHolder(final CalendarRecyclerViewHolder holder, final int position) {
 
         final Achievement tmpItem = items.get(position);
 
         holder.bind(tmpItem);
+
+        holder.getRemoveAchievementButton().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // remove the achievement from firebase and update the list
+                fragment.removeAchievement(holder.getNameTextView().getText().toString());
+            }
+        });
 
     }
 

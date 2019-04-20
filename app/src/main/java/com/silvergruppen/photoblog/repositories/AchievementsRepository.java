@@ -3,8 +3,10 @@ package com.silvergruppen.photoblog.repositories;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -13,18 +15,19 @@ import com.silvergruppen.photoblog.items.Achievement;
 import com.silvergruppen.photoblog.items.RecycleListItem;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class AchievementsRepository {
 
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
 
-    public LiveData<ArrayList<RecycleListItem>> getAchievements() {
+    public LiveData<ArrayList<RecycleListItem>> getAchievements(String userId) {
         // This isn't an optimal implementation. We'll fix it later.
         final MutableLiveData<ArrayList<RecycleListItem>> data = new MutableLiveData<>();
 
 
-        firebaseFirestore.collection("Achievements")
+        firebaseFirestore.collection("Users/"+userId+"/Achievements")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -51,6 +54,23 @@ public class AchievementsRepository {
                 });
         return data;
     }
+
+    public void addAchievementToFirebase(String userId, String achievementName, String topic){
+
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        Map<String, Object> achievementData = new HashMap<>();
+        achievementData.put("name", achievementName);
+        achievementData.put("points", "10");
+        achievementData.put("topic", topic);
+
+        firebaseFirestore.collection("Users/"+userId+"/Achievements").document(achievementName).set(achievementData).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                // TODO: Show user that the data did not load
+            }
+        });
+    }
+
 
 
 
