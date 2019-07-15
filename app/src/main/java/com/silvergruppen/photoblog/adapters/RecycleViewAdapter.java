@@ -23,7 +23,6 @@ import java.util.ArrayList;
 
 public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.MyViewHolder> {
     private ArrayList<? extends RecycleListItem> listItems;
-    private ArrayList<Achievement> achievemetItems;
     private Context context;
     private FirebaseAuth firebaseAuth;
     private FirebaseFirestore firebaseFirestore;
@@ -99,7 +98,7 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
 
     }
 
-    public void updateList(ArrayList<RecycleListItem> newAchievements){
+    public void updateList(ArrayList<? extends RecycleListItem> newAchievements){
 
         listItems = newAchievements;
         notifyDataSetChanged();

@@ -18,6 +18,7 @@ public class Achievement extends RecycleListItem{
 
     // views
     View view;
+    View branchView;
 
     // strings
     private String points;
@@ -282,5 +283,13 @@ public class Achievement extends RecycleListItem{
 
     public void setTreeLevel(int treeLevel) {
         this.treeLevel = treeLevel;
+    }
+
+    public View getBranchView() {
+        return branchView;
+    }
+
+    public void setBranchView(View branchView) {
+        this.branchView = branchView;
     }
 }

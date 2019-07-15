@@ -7,8 +7,10 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.inputmethodservice.Keyboard;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
@@ -88,6 +90,7 @@ public class AchievementsFragment2 extends Fragment {
 
 
 
+
     public AchievementsFragment2() {
 
         listAchievements = new ArrayList<>();
@@ -143,17 +146,7 @@ public class AchievementsFragment2 extends Fragment {
         // load the achievmeents
         achievmentsViewModel = ViewModelProviders.of(this).get(AchievmentsViewModel.class);
         achievmentsViewModel.init(userId);
-        final Observer<ArrayList<RecycleListItem>> achievementsObserver = new Observer<ArrayList<RecycleListItem>>() {
-            @Override
-            public void onChanged(@Nullable final ArrayList<RecycleListItem> newAchievements) {
-                listAchievements =newAchievements;
-                catagoriesListAdapter.updateList(getListOfAchievementsInCatagorie(currentCatagorie));
-
-            }
-        };
-        achievmentsViewModel.getAchievementsList().observe(this,achievementsObserver);
-
-
+        refreshAchievementList();
         showAddachievementsViewButton = view.findViewById(R.id.show_add_achievement_view_button);
         showAddachievementsViewButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -168,6 +161,20 @@ public class AchievementsFragment2 extends Fragment {
         achievementNameEditTextView = view.findViewById(R.id.new_achievement_text);
 
         // when the add achievement button is pressed, add the achievement to firebase and reload the fragment
+        final Observer<Boolean> addAchievementCompleteObserver = new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable final Boolean sucessfulUppload) {
+               if(sucessfulUppload) {
+                   Toast.makeText(getContext(), "Achievement added", Toast.LENGTH_LONG).show();
+
+                   // close the add achievement popup
+                   closeAddAchievementPopup();
+               }
+               else
+                   Toast.makeText(getContext(), "Failed to add achievement", Toast.LENGTH_LONG).show();
+
+            }
+        };
         addAchievementButton = view.findViewById(R.id.add_new_achievement_button);
         addAchievementButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -179,12 +186,31 @@ public class AchievementsFragment2 extends Fragment {
                 }
 
                 // tell the view model to update the lists of achievements
-                achievmentsViewModel.addAchievementToList(userId, achievementNameEditTextView.getText().toString(), currentCatagorie.getName());
+                achievmentsViewModel.addAchievementToList(userId, achievementNameEditTextView.getText().toString(), currentCatagorie.getName()).observe(getActivity(),addAchievementCompleteObserver);
+                listAchievements.add(new Achievement(achievementNameEditTextView.getText().toString(), currentCatagorie.getName(), "20" , true,currentCatagorie.getName()));
+                catagoriesListAdapter.updateList(getListOfAchievementsInCatagorie(currentCatagorie));
+                catagoriesListAdapter.notifyDataSetChanged();
+
+                Toast.makeText(getContext(), "Adding achievement", Toast.LENGTH_LONG).show();
             }
         });
 
         return view;
 
+    }
+    private void refreshAchievementList(){
+
+        final Observer<ArrayList<RecycleListItem>> achievementsObserver = new Observer<ArrayList<RecycleListItem>>() {
+            @Override
+            public void onChanged(@Nullable final ArrayList<RecycleListItem> newAchievements) {
+                listAchievements =newAchievements;
+                Toast.makeText(getContext(), Integer.toString(listAchievements.size()), Toast.LENGTH_LONG).show();
+                catagoriesListAdapter.updateList(getListOfAchievementsInCatagorie(currentCatagorie));
+                catagoriesListAdapter.notifyDataSetChanged();
+
+            }
+        };
+        achievmentsViewModel.getAchievementsList().observe(this, achievementsObserver);
     }
 
     private ArrayList<RecycleListItem> getListOfAchievementsInCatagorie(Catagorie catagorie){
@@ -199,6 +225,10 @@ public class AchievementsFragment2 extends Fragment {
         }
         return achievementsInCatagorie;
 
+    }
+    private void closeAddAchievementPopup(){
+
+       expandedImage.setVisibility(View.INVISIBLE);
     }
 
     public void setCurrentCatagorie(Catagorie currentCatagorie) {

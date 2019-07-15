@@ -280,10 +280,13 @@ public class CalendarFragment extends Fragment {
 
     private void updateCalendarItems(HashMap<String, ArrayList<Achievement>> newDoneMap, String achievementType){
 
+
+
         ArrayList<CalendarItem> newCalendarItems;
 
         if(DAILY_KEY.equals(achievementType))
              newCalendarItems = calendarGridViewAdapter.getCalendarItems();
+
         else
             newCalendarItems = weekleyGridViewAdapter.getWeekleyItems();
 
@@ -292,33 +295,43 @@ public class CalendarFragment extends Fragment {
             CalendarItem item = newCalendarItems.get(i);
 
                 int progress = 0;
+                int nmbOfAchievements =0;
                 int tmpAchievementKey;
-                if(achievementType.equals(DAILY_KEY))
+               if(achievementType.equals(DAILY_KEY))
                     tmpAchievementKey = Calendar.DAY_OF_YEAR;
                 else
-                    tmpAchievementKey = Calendar.WEEK_OF_YEAR;
+                  tmpAchievementKey = Calendar.WEEK_OF_YEAR;
 
-                if(newDoneMap.get(item.getCalendar().get(tmpAchievementKey)) != null) {
-                    ArrayList<Achievement> dailyAchievements = newDoneMap.get(item.getCalendar().get(tmpAchievementKey));
+                if(newDoneMap.get(Integer.toString(item.getCalendar().get(tmpAchievementKey))) != null) {
+                    ArrayList<Achievement> dailyAchievements = newDoneMap.get(Integer.toString(item.getCalendar().get(tmpAchievementKey)));
                     for(Achievement achievement : dailyAchievements) {
                         if(achievement.isDone())
                             progress++;
                     }
+                    nmbOfAchievements = dailyAchievements.size();
+
                 }
+
                 item.setProgress(progress);
 
                 // update the progress of the
-                if(item.getCalendar().get(Calendar.DAY_OF_YEAR) == calendar.get(Calendar.DAY_OF_YEAR)) {
-                    dailyProgressbar.setProgress(progress);
-                    dailyProgressFractionTextView.setText(progress+"/8");
+                if(item.getCalendar().get(tmpAchievementKey) == Calendar.getInstance().get(tmpAchievementKey)) {
+                    if(DAILY_KEY.equals(achievementType)) {
+                        dailyProgressbar.setProgress(progress);
+                        dailyProgressFractionTextView.setText(progress + "/" + nmbOfAchievements);
+                    }else{
+                        weekleyProgressbar.setProgress(progress);
+                        weekleyProgressFractionTextView.setText(progress + "/" + nmbOfAchievements);
+                    }
+
                 }
 
 
 
         }
         if(achievementType.equals(DAILY_KEY)) {
-            calendarGridViewAdapter.setCalendarItems(newCalendarItems);
-            calendarGridViewAdapter.notifyDataSetChanged();
+            //calendarGridViewAdapter.setCalendarItems(newCalendarItems);
+            //calendarGridViewAdapter.notifyDataSetChanged();
         }else{
             weekleyGridViewAdapter.setWeekleyItems(newCalendarItems);
             weekleyGridViewAdapter.notifyDataSetChanged();
@@ -507,5 +520,10 @@ public class CalendarFragment extends Fragment {
 
     public void removeAchievement(String achievementName){
         calendarViewModel.removeAchievement(userId,achievementName, currentVisibleAchievementList);
+    }
+
+    public CalendarViewModel getCalendarViewModel(){
+
+        return calendarViewModel;
     }
 }

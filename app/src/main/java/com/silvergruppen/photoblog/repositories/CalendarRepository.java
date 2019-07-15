@@ -53,6 +53,7 @@ public class CalendarRepository {
                         }
                         achievementList.put(document.getId(),tmpList);
 
+
                     }
                     // if the current day dosent exist: take the latest day there was a list or leave it to be null
                     int achievementKey;
@@ -65,6 +66,7 @@ public class CalendarRepository {
                         default: achievementKey =0;
                             break;
                     }
+
                     if (achievementList.get(Integer.toString(Calendar.getInstance().get(achievementKey))) == null) {
                         // check if some previous day has achievement
                         int currentDay = Calendar.getInstance().get(achievementKey);
@@ -77,6 +79,7 @@ public class CalendarRepository {
                         }
 
                     }
+
                     data.setValue(achievementList);
                 }
 
@@ -185,7 +188,6 @@ public class CalendarRepository {
     public void removeAchievement(String userId, String achievementName, String achievementType,ArrayList<Achievement> currentAchievementList){
 
         // copy all items except the one to be removed to the data map
-        Log.d("\n \n \n jsjs"," "+ currentAchievementList.size());
         Map<String,Object> updates = new HashMap<>();
         for(Achievement achievement : currentAchievementList){
             if(!achievement.getName().equals(achievementName)){
@@ -210,6 +212,17 @@ public class CalendarRepository {
                 break;
         }
         firebaseFirestore.collection("Users/"+userId+"/"+achievementType).document(Integer.toString(Calendar.getInstance().get(achievementKey))).set(updates);
+
+    }
+
+    public void updateAchievementDone(String achievementKey, Achievement currentAchievement, Boolean done, String dayMonth, String userId){
+
+        Map<String,Object> updates = new HashMap<>();
+        if (done)
+            updates.put(currentAchievement.getName(), "1");
+        else
+            updates.put(currentAchievement.getName(), "0");
+      firebaseFirestore.collection("Users/"+userId+"/"+achievementKey).document(dayMonth).set(updates);
 
     }
 

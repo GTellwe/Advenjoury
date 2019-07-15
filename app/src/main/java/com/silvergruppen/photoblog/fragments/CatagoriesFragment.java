@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -110,8 +111,10 @@ public class CatagoriesFragment extends Fragment {
         final Observer<ArrayList<Catagorie>> catagorieObserver = new Observer<ArrayList<Catagorie>>() {
             @Override
             public void onChanged(@Nullable final ArrayList<Catagorie> newCatagories) {
+
                 listCatagories = newCatagories;
-                catagoriesListAdapter.notifyDataSetChanged();
+                catagoriesListAdapter.updateList(newCatagories);
+
             }
         };
 

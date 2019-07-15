@@ -32,24 +32,13 @@ public class CatagoriesRepository {
                             final ArrayList<Catagorie> tmpArray = new ArrayList<>();
                             for (DocumentSnapshot document : task.getResult()) {
 
-                                final String catagorieName = document.getId();
-                                firebaseFirestore.collection("Topics").document(document.getId()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-
-                                        if (task.getResult().exists()) {
-
-                                            Map<String, Object> tmpMap = task.getResult().getData();
-                                            int members = Integer.parseInt(tmpMap.get("members").toString());
-                                            tmpArray.add(new Catagorie(catagorieName, members));
-
-                                        }
-
-                                    }
-                                });
-
+                                Map<String, Object> tmpMap = document.getData();
+                                int members = Integer.parseInt(tmpMap.get("members").toString());
+                                String name =  tmpMap.get("name").toString();
+                                tmpArray.add(new Catagorie(name, members));
                             }
                             data.setValue(tmpArray);
+
                         } else {
 
                         }

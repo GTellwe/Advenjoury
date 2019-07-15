@@ -62,6 +62,11 @@ public class CalendarViewModel extends ViewModel{
 
         calendarRepo.uppdateCurrentAchievementList(userId,achievementsList,achievementKey);
     }
+    public void updateAchievementDone(String achievementKey, Achievement currentAchievement, Boolean done, String userId, String dayMonth){
+
+        calendarRepo.updateAchievementDone(achievementKey,currentAchievement,done, dayMonth,userId);
+
+    }
 
     public void removeAchievement(String userId,String achievementName, String achievementType){
 
@@ -82,12 +87,8 @@ public class CalendarViewModel extends ViewModel{
 
         }
 
-        Log.d("\n \n \n kakat"," ");
-
-
             // check if some previous day has achievement
             int currentDay = Calendar.getInstance().get(achievementKey);
-            Log.d("\n \n \n kaka",currentDay+" ");
             while (currentDay >0){
 
                 if(achievementList.get(Integer.toString(currentDay)) != null){

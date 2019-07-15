@@ -4,10 +4,12 @@ import android.content.Context;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
@@ -42,6 +44,7 @@ public class CalendarAcievementsRecyclerViewAdapter extends RecyclerView.Adapter
 
     // strings
     private String user_id;
+
 
     // other
     private Context context;
@@ -98,6 +101,17 @@ public class CalendarAcievementsRecyclerViewAdapter extends RecyclerView.Adapter
             public void onClick(View view) {
                 // remove the achievement from firebase and update the list
                 fragment.removeAchievement(holder.getNameTextView().getText().toString());
+            }
+        });
+
+        holder.getaSwitch().setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+
+                // update firebase
+                fragment.getCalendarViewModel().updateAchievementDone(achievementKey, currentAchievement,b);
+
+
             }
         });
 

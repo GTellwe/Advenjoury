@@ -40,7 +40,6 @@ public class HowToRepository {
                         Map<String,Object> tmpMap = document.getData();
                         for(int i =1; i<= Integer.parseInt(tmpMap.get("numberOfChildren").toString()); i++){
 
-                            Log.d("herrrr "+"child"+Integer.toString(i)+" "+tmpMap.get("numberOfChildren").toString(),"\n \n \n \n");
                             if(tmpMap.get("child"+Integer.toString(i))!= null) {
                                 tmpList.add(new Achievement(tmpMap.get("child" + Integer.toString(i)).toString()));
 

@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -55,24 +56,26 @@ public class AchievementsRepository {
         return data;
     }
 
-    public void addAchievementToFirebase(String userId, String achievementName, String topic){
+    public LiveData<Boolean> addAchievementToFirebase(String userId, String achievementName, String topic) {
 
+        final MutableLiveData<Boolean> response = new MutableLiveData<>();
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         Map<String, Object> achievementData = new HashMap<>();
         achievementData.put("name", achievementName);
         achievementData.put("points", "10");
         achievementData.put("topic", topic);
 
-        firebaseFirestore.collection("Users/"+userId+"/Achievements").document(achievementName).set(achievementData).addOnFailureListener(new OnFailureListener() {
+        firebaseFirestore.collection("Users/" + userId + "/Achievements").document(achievementName).set(achievementData).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
-            public void onFailure(@NonNull Exception e) {
-                // TODO: Show user that the data did not load
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful())
+                    response.setValue(true);
+                else
+                    response.setValue(false);
             }
         });
+
+        return response;
     }
-
-
-
-
 }
 

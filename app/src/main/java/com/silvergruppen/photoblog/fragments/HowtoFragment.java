@@ -9,6 +9,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -22,6 +23,7 @@ import android.support.constraint.ConstraintSet;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.res.ResourcesCompat;
 import android.text.Layout;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -45,6 +47,7 @@ import com.silvergruppen.photoblog.viewmodels.HowToViewModel;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 
@@ -115,7 +118,7 @@ public class HowtoFragment extends Fragment {
         achievementNameEditTextView = view.findViewById(R.id.new_achievement_text);
 
         // get the add task button and set up the on click listener
-        subtaskHeadlineButton = view.findViewById(R.id.subtask_headline_button);
+       /* subtaskHeadlineButton = view.findViewById(R.id.subtask_headline_button);
         addTaskButton = view.findViewById(R.id.add_task_button);
         addTaskButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,7 +128,7 @@ public class HowtoFragment extends Fragment {
 
             }
         });
-
+*/
 
 
         // initialize view holder and load data into the tree arrays
@@ -134,7 +137,7 @@ public class HowtoFragment extends Fragment {
         final Observer<HashMap<String, ArrayList<Achievement>>> taskTreeObserver = new Observer<HashMap<String, ArrayList<Achievement>>>() {
             @Override
             public void onChanged(@Nullable final HashMap<String, ArrayList<Achievement>> newTaskTree) {
-                uppdateTaskTreeView(newTaskTree,adjustableTaskTreeContainer);
+                uppdateTaskTreeView2(newTaskTree,adjustableTaskTreeContainer);
             }
         };
 
@@ -287,37 +290,143 @@ public class HowtoFragment extends Fragment {
 
         // create a linked list with all the achievements and fill in each achievements parent and children and level
         LinkedList<Achievement> linkedList = new LinkedList<>();
-        linkedListRecursionFunction(newTaskTree,parentAchievement, linkedList, 0);
+        addParentsAndChildrenRecursion(newTaskTree, parentAchievement,0);
+        ArrayList<Achievement> tmp = new ArrayList<>();
+        tmp.add(parentAchievement);
+        linkedListRecursionFunction(newTaskTree, tmp, linkedList);
 
-        // TODO: get all achievements in last level and add them to a linear layout
-        LinearLayout bottomLevelLayput = new LinearLayout(getContext());
-        bottomLevelLayput.setOrientation(LinearLayout.HORIZONTAL);
-        LinearLayout.LayoutParams lineParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        lineParams.gravity = Gravity.CENTER;
-        bottomLevelLayput.setLayoutParams(lineParams);
-        bottomLevelLayput.setGravity(Gravity.CENTER);
 
-        Achievement currentAchievement = linkedList.pollLast();
-        int level = currentAchievement.getTreeLevel();
-        while(currentAchievement.getTreeLevel()== level){
+        // initialize all the branch views
+        initializeBranchViews(linkedList);
 
-            addTaskLayoutToLayout(bottomLevelLayput, currentAchievement);
-            currentAchievement = linkedList.pollLast();
-        }
+        // crete the view tree
+        recursivelyCreateAllViews(linkedList);
 
-        //TODO: position the next levels relative to their cildren
+        // add tree view to the layout file
+        adjustableTaskTreeContainer.addView(parentAchievement.getBranchView());
+
+        // test code
+        //createBranch(parentAchievement);
+        //adjustableTaskTreeContainer.addView(parentAchievement.getBranchView());
 
 
     }
+    private void initializeBranchViews(LinkedList<Achievement> achievements){
 
-    private void addTaskLayoutToLayout(LinearLayout levelContainer, Achievement achievement){
+
+        for (int i =0; i< achievements.size(); i++) {
+           achievements.get(i).setBranchView(createLeafView(achievements.get(i)));
+
+        }
+
+    }
+
+    private void recursivelyCreateAllViews(LinkedList<Achievement> linkedList){
+
+        Achievement achievement = linkedList.pollLast();
+
+        //Log.d("size"+linkedList.size(),"\n \n \n \n saize");
+
+        if(achievement == null)
+            return;
+
+        if(achievement.getChildAchievements() != null && achievement.getChildAchievements().size() != 0) {
+            createBranch(achievement);
+            Log.d(achievement.getName()+" "+achievement.getChildAchievements().size(),"\n \n \n \n saize");
+
+        }
+
+
+        recursivelyCreateAllViews(linkedList);
+
+    }
+
+    private void createBranch(Achievement parent){
+
+        ArrayList<Achievement> children = parent.getChildAchievements();
+        // create the outmost container
+        ConstraintLayout mainContainer = new ConstraintLayout(getContext());
+        ConstraintLayout.LayoutParams mainContainerParams = new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
+        mainContainer.setLayoutParams(mainContainerParams);
+        ConstraintSet constraintSet = new ConstraintSet();
+        mainContainer.setId(View.generateViewId());
+
+        // crete the parent achievement leaf
+        View parentView = createLeafView(parent);
+
+        // add parent view to the main container and constraint the parent view
+        mainContainer.addView(parentView);
+        constraintSet.clone(mainContainer);
+       //constraintSet.connect(parentView.getId(),ConstraintSet.TOP, mainContainer.getId(),ConstraintSet.TOP);
+        constraintSet.connect(parentView.getId(),ConstraintSet.LEFT, mainContainer.getId(),ConstraintSet.LEFT);
+        constraintSet.connect(parentView.getId(),ConstraintSet.RIGHT, mainContainer.getId(),ConstraintSet.RIGHT);
+        constraintSet.applyTo(mainContainer);
+
+        // create the linear layput for the children and add the children
+        LinearLayout childrenContainer = new LinearLayout(getContext());
+        childrenContainer.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams lineParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lineParams.gravity = Gravity.TOP;
+        lineParams.setMargins(0,40,0,0);
+
+        childrenContainer.setLayoutParams(lineParams);
+
+       // childrenContainer.setGravity(Gravity.TOP);
+        childrenContainer.setId(View.generateViewId());
+
+        //  add children to the linear layout
+        for(Achievement achievement : children){
+
+            childrenContainer.addView(achievement.getBranchView());
+        }
+
+        // add vhildre to the main container and constrain it
+        mainContainer.addView(childrenContainer);
+        constraintSet.clone(mainContainer);
+        constraintSet.connect(childrenContainer.getId(), ConstraintSet.TOP,parentView.getId(), ConstraintSet.BOTTOM);
+        //constraintSet.connect(childrenContainer.getId(),ConstraintSet.LEFT, mainContainer.getId(),ConstraintSet.LEFT);
+        //constraintSet.connect(childrenContainer.getId(),ConstraintSet.RIGHT, mainContainer.getId(),ConstraintSet.RIGHT);
+        constraintSet.applyTo(mainContainer);
+
+        // TODO: add line views
+        /*
+        // Create the line views for each children
+        int[] parentLocation = new int[2];
+        parentView.getLocationInWindow(parentLocation);
+        int parentHeight =parentView.getHeight();
+        int parentWidth = parentView.getWidth();
+
+        for(Achievement achievement : children) {
+
+            int[] childLocation = new int[2];
+            achievement.getBranchView().getLocationInWindow(childLocation);
+            int childHeight = achievement.getBranchView().getHeight();
+            int childWidth = achievement.getBranchView().getWidth();
+
+            LineView lineView = new LineView(getActivity(), new Point(parentLocation[0] + parentWidth / 2, parentLocation[1] + parentHeight / 2), new Point(childLocation[0] + childWidth / 2, childLocation[1] + childHeight / 2));
+            lineView.setId(View.generateViewId());
+
+            mainContainer.addView(lineView);
+            constraintSet.clone(mainContainer);
+            constraintSet.connect(lineView.getId(), ConstraintSet.TOP,parentView.getId(), ConstraintSet.BOTTOM);
+            constraintSet.connect(lineView.getId(),ConstraintSet.LEFT, achievement.getBranchView().getId(),ConstraintSet.RIGHT);
+            constraintSet.connect(lineView.getId(),ConstraintSet.RIGHT, parentView.getId(),ConstraintSet.RIGHT);
+            constraintSet.applyTo(mainContainer);
+
+        }
+**/
+        parent.setBranchView(mainContainer);
+
+    }
+    private View createLeafView(Achievement achievement){
 
         LinearLayout newTaskContainer = new LinearLayout(getContext());
         newTaskContainer.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams lineParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
-        lineParams.gravity = Gravity.CENTER;
+        LinearLayout.LayoutParams lineParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        //lineParams.gravity = Gravity.CENTER;
         newTaskContainer.setLayoutParams(lineParams);
-        newTaskContainer.setGravity(Gravity.CENTER);
+        newTaskContainer.setGravity(Gravity.TOP);
+        newTaskContainer.setId(View.generateViewId());
 
         // set the layput parameters of the headline button
         Button newTaskButton = new Button(getContext());
@@ -330,6 +439,7 @@ public class HowtoFragment extends Fragment {
         newTaskButton.setText(achievement.getName());
         Typeface font =  ResourcesCompat.getFont(getContext(), R.font.montserrat);
         newTaskButton.setTypeface(font);
+        newTaskButton.setId(View.generateViewId());
 
         // add view to achievment
         achievement.setView(newTaskButton);
@@ -347,6 +457,7 @@ public class HowtoFragment extends Fragment {
         newTaskAddbutton.setElevation(50);
         newTaskAddbutton.setImageResource(R.drawable.baseline_add_24);
         newTaskAddbutton.setVisibility(View.INVISIBLE);
+        newTaskAddbutton.setId(View.generateViewId());
 
         // set the layput parameters of the minus button
         ImageButton newTaskMinusButton = new ImageButton(getContext());
@@ -361,32 +472,96 @@ public class HowtoFragment extends Fragment {
         newTaskMinusButton.setElevation(50);
         newTaskMinusButton.setImageResource(R.drawable.minus);
         newTaskMinusButton.setVisibility(View.INVISIBLE);
+        newTaskMinusButton.setId(View.generateViewId());
+
+        //TODO: Add button listeners
+
+        // Add the views to the task tree button hashmap
+        ArrayList<View> viewList = new ArrayList<>();
+        viewList.add(newTaskButton);
+        viewList.add(newTaskAddbutton);
+        viewList.add(newTaskMinusButton);
+        achievementNameToGetViewlist.put(achievement.getName(),viewList);
+        viewToGetAchiementName.put(newTaskAddbutton,achievement.getName());
+        viewToGetAchiementName.put(newTaskMinusButton, achievement.getName());
+
+        newTaskAddbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String achievementName = ((Button)achievementNameToGetViewlist.get(viewToGetAchiementName.get(view)).get(0)).getText().toString();
+                currentActiveSubTask = new Achievement(achievementName);
+                showHideTaskList(view);
+            }
+        });
+
+        newTaskMinusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getContext(),"Minus button pressed",Toast.LENGTH_LONG).show();
+            }
+        });
+
+        newTaskButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                // show/hide the plus minus buttons
+                String achievementName = ((Button) view).getText().toString();
+                ImageButton plusButton = (ImageButton) achievementNameToGetViewlist.get(achievementName).get(1);
+                ImageButton minusButton = (ImageButton) achievementNameToGetViewlist.get(achievementName).get(2);
+
+                toggleVisibility(plusButton);
+                toggleVisibility(minusButton);
+
+                return false;
+            }
+        });
 
 
         // add view to the layout
         newTaskContainer.addView(newTaskMinusButton);
         newTaskContainer.addView(newTaskButton);
         newTaskContainer.addView(newTaskAddbutton);
-        levelContainer.addView(newTaskContainer);
+
+        return newTaskContainer;
+    }
+
+
+    private void linkedListRecursionFunction(HashMap<String, ArrayList<Achievement>> newTaskTree,ArrayList<Achievement> nextLevelAchievements, LinkedList<Achievement> linkedList){
+
+        ArrayList<Achievement> newNextLevelAchievements = new ArrayList<>();
+
+        for(Achievement achievement : nextLevelAchievements){
+
+            linkedList.add(achievement);
+            ArrayList<Achievement> children = newTaskTree.get(achievement.getName());
+            if(children != null)
+                newNextLevelAchievements.addAll(children);
+        }
+        if(nextLevelAchievements.isEmpty())
+            return;
+
+        linkedListRecursionFunction(newTaskTree, newNextLevelAchievements, linkedList);
+
 
     }
-    private void linkedListRecursionFunction(HashMap<String, ArrayList<Achievement>> newTaskTree,Achievement parent, LinkedList<Achievement> linkedList, int level){
+    private void addParentsAndChildrenRecursion(HashMap<String, ArrayList<Achievement>> newTaskTree,Achievement parent, int level){
 
-        linkedList.add(parent);
-        ArrayList<Achievement> children =newTaskTree.get(achievement.getName());
-        achievement.setTreeLevel(level);
+
+
+        ArrayList<Achievement> children =newTaskTree.get(parent.getName());
+        parent.setTreeLevel(level);
 
         if(children == null) {
             return;
         }
 
         parent.setChildAchievements(children);
+
         for(Achievement achievement : children){
 
             achievement.setParentAchievement(parent);
-            linkedListRecursionFunction(newTaskTree, achievement,linkedList,level++);
+            addParentsAndChildrenRecursion(newTaskTree, achievement,level++);
         }
-
     }
 
     /**
@@ -444,7 +619,7 @@ public class HowtoFragment extends Fragment {
                 // add the the parent achievement
                 achievement.setParentAchievement(parentAchievement);
 
-                Toast.makeText(getContext(), " updating task tree"+achievement.getName(),Toast.LENGTH_LONG).show();
+               // Toast.makeText(getContext(), " updating task tree"+achievement.getName(),Toast.LENGTH_LONG).show();
                 // TODO: add achievement field to linear layout
                 //TODO: add the layout parameters to the views
                 // set the layput parameters of the container

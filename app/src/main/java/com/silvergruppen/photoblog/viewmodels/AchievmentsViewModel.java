@@ -33,9 +33,9 @@ public class AchievmentsViewModel extends ViewModel {
         return this.achievementsList;
     }
 
-    public void  addAchievementToList(String userId,String achievementName, String topic){
+    public LiveData<Boolean>  addAchievementToList(String userId,String achievementName, String topic){
 
-        achievementrRepo.addAchievementToFirebase(userId, achievementName, topic);
+        return achievementrRepo.addAchievementToFirebase(userId, achievementName, topic);
     }
 
 }

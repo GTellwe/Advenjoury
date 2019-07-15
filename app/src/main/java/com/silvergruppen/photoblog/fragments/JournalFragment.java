@@ -100,7 +100,7 @@ public class JournalFragment extends Fragment {
                 postItems = newPostItems;
                 notifyDataSetChanged();
 
-                Toast.makeText(getContext(), Integer.toString(postItems.size()), Toast.LENGTH_LONG).show();
+                //Toast.makeText(getContext(), Integer.toString(postItems.size()), Toast.LENGTH_LONG).show();
             }
         };
 
