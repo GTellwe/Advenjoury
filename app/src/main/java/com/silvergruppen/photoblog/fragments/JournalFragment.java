@@ -34,7 +34,7 @@ public class JournalFragment extends Fragment {
     private FloatingActionButton addPostButton;
 
     // lists
-    private static ArrayList<PostItem> postItems;
+    private  ArrayList<PostItem> postItems;
 
     // strings
     private String userId;
@@ -97,10 +97,12 @@ public class JournalFragment extends Fragment {
             @Override
             public void onChanged(@Nullable final ArrayList<PostItem> newPostItems) {
 
-                postItems = newPostItems;
+                //postItems = newPostItems;
+                postListAdapter.clonePostList(newPostItems);
+                postListAdapter.notifyDataSetChanged();
                 notifyDataSetChanged();
 
-                //Toast.makeText(getContext(), Integer.toString(postItems.size()), Toast.LENGTH_LONG).show();
+                //Toast.makeText(getContext(), "nnmbposts"+Integer.toString(postItems.size()), Toast.LENGTH_LONG).show();
             }
         };
 

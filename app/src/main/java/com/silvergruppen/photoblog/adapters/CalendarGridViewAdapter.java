@@ -94,10 +94,10 @@ public class CalendarGridViewAdapter extends BaseAdapter {
 
 
 
-            holder.getDailyProgressTextview().setText(calendarItem.getProgress() + "/8");
+            holder.getDailyProgressTextview().setText(calendarItem.getProgress() + "/"+calendarItem.getMaxProgress());
            // Log.d(calendarItem.getProgress()+" \n \n \n \n","adapter progress");
 
-            if (calendarItem.getProgress() == 8) {
+            if (calendarItem.getProgress() == calendarItem.getMaxProgress() && calendarItem.getMaxProgress() != 0) {
 
                 holder.getDateTextView().setTextColor(Color.WHITE);
                 holder.getDailyProgressTextview().setTextColor(Color.WHITE);

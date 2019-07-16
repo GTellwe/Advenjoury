@@ -45,6 +45,10 @@ public class CalendarAcievementsRecyclerViewAdapter extends RecyclerView.Adapter
     // strings
     private String user_id;
 
+    // keys
+    private final String DAILY_KEY = "DailyAchievements";
+    private final String WEEKLY_KEY = "WeekleyAchievements";
+    private final String MONTHLY_KEY = "MonthlyAchievements";
 
     // other
     private Context context;
@@ -56,6 +60,7 @@ public class CalendarAcievementsRecyclerViewAdapter extends RecyclerView.Adapter
     private MonthlyProgress monthlyProgress;
     private final static int dailyId=1, weekleyId = 2, monthlyId = 3;
     private CalendarFragment fragment;
+    private String achivementKey;
 
 
     public CalendarAcievementsRecyclerViewAdapter(Context context, CalendarFragment fragment) {
@@ -94,8 +99,12 @@ public class CalendarAcievementsRecyclerViewAdapter extends RecyclerView.Adapter
 
         final Achievement tmpItem = items.get(position);
 
+        // set the checkbox
+        holder.getaSwitch().setChecked(tmpItem.isDone());
+
         holder.bind(tmpItem);
 
+        // handle the remove achievement button
         holder.getRemoveAchievementButton().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -104,12 +113,35 @@ public class CalendarAcievementsRecyclerViewAdapter extends RecyclerView.Adapter
             }
         });
 
+        // update firebase when swich is checked or unchcecked
         holder.getaSwitch().setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
 
                 // update firebase
-                fragment.getCalendarViewModel().updateAchievementDone(achievementKey, currentAchievement,b);
+                // get wich day month or week it is
+                String dayMonth;
+                switch (achivementKey){
+
+                    case DAILY_KEY:
+                        dayMonth = Integer.toString(Calendar.getInstance().get(Calendar.DAY_OF_YEAR));
+                        break;
+                    case WEEKLY_KEY:
+                        dayMonth = Integer.toString(Calendar.getInstance().get(Calendar.WEEK_OF_YEAR));
+                        break;
+                    case MONTHLY_KEY:
+                        dayMonth = Integer.toString(Calendar.getInstance().get(Calendar.MONTH));
+                        break;
+
+                    default:
+                        dayMonth = "0";
+
+                            break;
+                }
+                fragment.getCalendarViewModel().updateAchievementDone(achivementKey, tmpItem,b,dayMonth);
+
+                // update the UI progress
+                fragment.updateProgress(achivementKey, b);
 
 
             }
@@ -129,6 +161,11 @@ public class CalendarAcievementsRecyclerViewAdapter extends RecyclerView.Adapter
 
     public void setItems(ArrayList<Achievement> items) {
         this.items = items;
+    }
+
+    public void setAchivementKey(String achivementKey){
+        this.achivementKey = achivementKey;
+
     }
 
 

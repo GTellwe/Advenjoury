@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.silvergruppen.photoblog.R;
 import com.silvergruppen.photoblog.items.Achievement;
@@ -47,6 +48,7 @@ public class AchievementFragment extends Fragment {
     // other
     private Achievement achievement;
     private ViewPagerAdapter viewPagerAdapter;
+    private String userId;
 
     public AchievementFragment(){
 
@@ -80,7 +82,7 @@ public class AchievementFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.activity_achievement, container, false);
         String userId = getArguments().getString(UID_KEY);
-
+        this.userId = userId;
         // update achievement and user id on the child fragments
         journalFragment.setUserId(userId);
         journalFragment.setAchievement(achievement);
@@ -104,12 +106,31 @@ public class AchievementFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        // update achievement and user id on the child fragments
+        journalFragment.setUserId(userId);
+        journalFragment.setAchievement(achievement);
+        settingsFragment.setAchievement(achievement);
+        settingsFragment.setUserId(userId);
+        howtoFragment.setUserId(userId);
+        howtoFragment.setAchievement(achievement);
+
+        // set up the view pager and tab layout
+        viewPager = (ViewPager) getView().findViewById(R.id.achievement_view_pager);
+        setupViewPager(viewPager);
+        tabLayout = (TabLayout) getView().findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
+        //Toast.makeText(getContext(),"view paused", Toast.LENGTH_LONG).show();
         FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.detach(journalFragment);
-        fragmentTransaction.detach(settingsFragment);
-        fragmentTransaction.detach(howtoFragment);
+        fragmentTransaction.remove(journalFragment);
+        fragmentTransaction.remove(settingsFragment);
+        fragmentTransaction.remove(howtoFragment);
         fragmentTransaction.commit();
     }
 
@@ -157,6 +178,8 @@ public class AchievementFragment extends Fragment {
 
     public void setAchievement(Achievement achievement) {
         settingsFragment.setAchievement(achievement);
+        journalFragment.setAchievement(achievement);
+        howtoFragment.setAchievement(achievement);
         this.achievement = achievement;
     }
 }

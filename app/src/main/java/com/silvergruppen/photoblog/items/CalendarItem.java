@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class CalendarItem {
     private Calendar calendar;
-    private int progress;
+    private int progress, maxProgress;
 
 
     public CalendarItem(Calendar calendar) {
@@ -13,6 +13,7 @@ public class CalendarItem {
         this.calendar = calendar;
 
         progress = 0;
+        maxProgress = 0;
     }
 
 
@@ -31,5 +32,13 @@ public class CalendarItem {
 
     public void setProgress(int progress) {
         this.progress = progress;
+    }
+
+    public int getMaxProgress() {
+        return maxProgress;
+    }
+
+    public void setMaxProgress(int maxProgress) {
+        this.maxProgress = maxProgress;
     }
 }

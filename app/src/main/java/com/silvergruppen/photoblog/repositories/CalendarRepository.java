@@ -47,7 +47,7 @@ public class CalendarRepository {
                         for(HashMap.Entry<String, Object> entry : tmpMap.entrySet()){
 
                             boolean done = false;
-                            if(entry.getValue() == "1")
+                            if(entry.getValue().equals("1"))
                                 done = true;
                             tmpList.add(new Achievement(entry.getKey(),null, null,done, null));
                         }
@@ -63,6 +63,8 @@ public class CalendarRepository {
                             break;
                         case WEEKLY_KEY: achievementKey = Calendar.WEEK_OF_YEAR;
                             break;
+                        case MONTHLY_KEY: achievementKey = Calendar.MONTH;
+
                         default: achievementKey =0;
                             break;
                     }

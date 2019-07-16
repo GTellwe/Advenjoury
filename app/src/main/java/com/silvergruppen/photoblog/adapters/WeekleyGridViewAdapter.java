@@ -84,9 +84,9 @@ public class WeekleyGridViewAdapter extends BaseAdapter {
 
 
 
-        holder.getDailyProgressTextview().setText(weekleyItem.getProgress() + "/8");
+        holder.getDailyProgressTextview().setText(weekleyItem.getProgress() + "/"+Integer.toString(weekleyItem.getMaxProgress()));
 
-        if (weekleyItem.getProgress() == 8) {
+        if (weekleyItem.getProgress() == weekleyItem.getMaxProgress() && weekleyItem.getMaxProgress() != 0) {
 
             holder.getDateTextView().setTextColor(Color.WHITE);
             holder.getDailyProgressTextview().setTextColor(Color.WHITE);

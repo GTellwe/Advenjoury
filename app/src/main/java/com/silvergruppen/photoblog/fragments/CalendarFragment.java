@@ -83,7 +83,7 @@ public class CalendarFragment extends Fragment {
     private WeekleyGridViewAdapter weekleyGridViewAdapter;
 
     //Lists
-    private ArrayList<CalendarItem> calendarItems, weekleyItems;
+    private ArrayList<CalendarItem> calendarItems, weekleyItems, monthlyItems;
     private String[] monthNames =  {"January", "February",
             "March", "April", "May", "June", "July",
             "August", "September", "October", "November",
@@ -110,6 +110,9 @@ public class CalendarFragment extends Fragment {
 
         // set up the weekley items list
         weekleyItems  = computeCalendarITemsForWeeks(calendarItems);
+
+        // set up the montyly items list
+        monthlyItems = computeCalendarItemsForMonths(monthlyItems);
 
 
         // set up the achievementsLists
@@ -174,29 +177,13 @@ public class CalendarFragment extends Fragment {
         final Observer<HashMap<String, ArrayList<Achievement>>> monthlyObserver = new Observer<HashMap<String, ArrayList<Achievement>>>() {
             @Override
             public void onChanged(@Nullable final HashMap<String, ArrayList<Achievement>> newDoneMatrix) {
-                /*int[] currentMonthMonthlyAchievementsDone = newDoneMatrix[calendar.get(Calendar.MONTH)-1];
-                int monthlyProgress =0;
-                for( int i=0; i<currentMonthMonthlyAchievementsDone.length; i++)
-                    if(currentMonthMonthlyAchievementsDone[i] == 1) {
-                        monthlyList.get(i).setDone(true);
-                        monthlyProgress++;
-                    }
-                monthProgressTextView.setText(monthlyProgress+"/1");
-                if(monthlyProgress == 1) {
-                    //monthTextLayout.setBackgroundResource(R.drawable.monthbackground);
-                    monthProgressTextView.setTextColor(Color.WHITE);
-                    monthProgressTextView.setBackgroundResource(R.drawable.calendar_item_background_drawable);
-                    //monthTextView.setTextColor(Color.WHITE);
-                }
-
-                // set the monthly progressbar progress
-                monthlyProgressbar.setProgress(monthlyProgress);
-                monthlyProgressFractionTextView.setText(monthlyProgress+"/1");
-                */
+                updateCalendarItems(newDoneMatrix, MONTHLY_KEY);
+                if(newDoneMatrix.get(Integer.toString(Calendar.getInstance().get(Calendar.MONTH))) != null)
+                    monthlyList = newDoneMatrix.get(Integer.toString(Calendar.getInstance().get(Calendar.MONTH)));
             }
         };
 
-        calendarViewModel.getDoneMonthlyAchievementsMatrix().observe(this, monthlyObserver);
+        calendarViewModel.getDoneAchievementsMatrix().observe(this,monthlyObserver);
 
         // set up the grid views
         calendarGridView = view.findViewById(R.id.daily_progress_calendar_grid_view);
@@ -221,14 +208,14 @@ public class CalendarFragment extends Fragment {
 
 
         // set the on click listener to the monthly progress
-        monthTextView.setOnClickListener(new View.OnClickListener() {
+       /* monthTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 MainActivity mainActivity = (MainActivity) getContext();
                 mainActivity.startDailyProgressFragment(Calendar.getInstance(),monthlyId);
             }
         });
-
+*/
         // setup the pop up views and lists
         expandedImage = view.findViewById(R.id.achievements_list_container);
         mainContainer = view.findViewById(R.id.container);
@@ -249,6 +236,7 @@ public class CalendarFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 recycleViewAdapter.setItems(dailyList);
+                recycleViewAdapter.setAchivementKey(DAILY_KEY);
                 recycleViewAdapter.notifyDataSetChanged();
                 currentVisibleAchievementList = DAILY_KEY;
                 zoomImageFromThumb(view, R.drawable.icon);
@@ -259,6 +247,7 @@ public class CalendarFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 recycleViewAdapter.setItems(weeklyList);
+                recycleViewAdapter.setAchivementKey(WEEKLY_KEY);
                 recycleViewAdapter.notifyDataSetChanged();
                 currentVisibleAchievementList = WEEKLY_KEY;
                 zoomImageFromThumb(view, R.drawable.icon);
@@ -269,6 +258,7 @@ public class CalendarFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 recycleViewAdapter.setItems(monthlyList);
+                recycleViewAdapter.setAchivementKey(MONTHLY_KEY);
                 recycleViewAdapter.notifyDataSetChanged();
                 currentVisibleAchievementList = MONTHLY_KEY;
                 zoomImageFromThumb(view, R.drawable.icon);
@@ -276,6 +266,39 @@ public class CalendarFragment extends Fragment {
         });
 
         return view;
+    }
+
+    public void updateProgress(String achievementKey, boolean bIncreaseProgress){
+
+
+        switch (achievementKey){
+
+            case DAILY_KEY:
+                inccreaseDecreaseProgressbar(bIncreaseProgress,dailyProgressbar,dailyProgressFractionTextView);
+                break;
+            case WEEKLY_KEY:
+                inccreaseDecreaseProgressbar(bIncreaseProgress,weekleyProgressbar,weekleyProgressFractionTextView);
+                break;
+            case MONTHLY_KEY:
+                inccreaseDecreaseProgressbar(bIncreaseProgress,monthlyProgressbar,monthProgressTextView);
+                break;
+
+            default:
+                break;
+        }
+
+
+    }
+
+    private void inccreaseDecreaseProgressbar(boolean bIncreaseProgress, ProgressBar progressBar, TextView progresTexgtView){
+        if(bIncreaseProgress){
+            progressBar.setProgress(progressBar.getProgress()+1);
+
+        }else{
+            progressBar.setProgress(progressBar.getProgress()-1);
+        }
+        progresTexgtView.setText(progressBar.getProgress()+"/"+progressBar.getMax());
+
     }
 
     private void updateCalendarItems(HashMap<String, ArrayList<Achievement>> newDoneMap, String achievementType){
@@ -286,10 +309,11 @@ public class CalendarFragment extends Fragment {
 
         if(DAILY_KEY.equals(achievementType))
              newCalendarItems = calendarGridViewAdapter.getCalendarItems();
-
-        else
+        else if(WEEKLY_KEY.equals(achievementType))
             newCalendarItems = weekleyGridViewAdapter.getWeekleyItems();
-
+        else {
+            newCalendarItems = monthlyItems;
+        }
         for(int i =0; i<newCalendarItems.size();i++){
 
             CalendarItem item = newCalendarItems.get(i);
@@ -297,44 +321,55 @@ public class CalendarFragment extends Fragment {
                 int progress = 0;
                 int nmbOfAchievements =0;
                 int tmpAchievementKey;
-               if(achievementType.equals(DAILY_KEY))
+
+                if(achievementType.equals(DAILY_KEY))
                     tmpAchievementKey = Calendar.DAY_OF_YEAR;
+                else if(achievementType.equals(WEEKLY_KEY))
+                    tmpAchievementKey = Calendar.WEEK_OF_YEAR;
                 else
-                  tmpAchievementKey = Calendar.WEEK_OF_YEAR;
+                    tmpAchievementKey = Calendar.MONTH;
+
 
                 if(newDoneMap.get(Integer.toString(item.getCalendar().get(tmpAchievementKey))) != null) {
                     ArrayList<Achievement> dailyAchievements = newDoneMap.get(Integer.toString(item.getCalendar().get(tmpAchievementKey)));
                     for(Achievement achievement : dailyAchievements) {
                         if(achievement.isDone())
                             progress++;
-                    }
-                    nmbOfAchievements = dailyAchievements.size();
-
-                }
-
-                item.setProgress(progress);
-
-                // update the progress of the
-                if(item.getCalendar().get(tmpAchievementKey) == Calendar.getInstance().get(tmpAchievementKey)) {
-                    if(DAILY_KEY.equals(achievementType)) {
-                        dailyProgressbar.setProgress(progress);
-                        dailyProgressFractionTextView.setText(progress + "/" + nmbOfAchievements);
-                    }else{
-                        weekleyProgressbar.setProgress(progress);
-                        weekleyProgressFractionTextView.setText(progress + "/" + nmbOfAchievements);
+                        }
+                        nmbOfAchievements = dailyAchievements.size();
                     }
 
-                }
+                    item.setProgress(progress);
+                    item.setMaxProgress(nmbOfAchievements);
+                    calendarGridViewAdapter.notifyDataSetChanged();
+
+                    // update the progress of the
+                    if(item.getCalendar().get(tmpAchievementKey) == Calendar.getInstance().get(tmpAchievementKey)) {
+                        if(DAILY_KEY.equals(achievementType)) {
+                            dailyProgressbar.setMax(nmbOfAchievements);
+                            dailyProgressbar.setProgress(progress);
+                            dailyProgressFractionTextView.setText(progress + "/" + nmbOfAchievements);
+                        }else if(WEEKLY_KEY.equals(achievementType)){
+                            weekleyProgressbar.setProgress(progress);
+                            weekleyProgressFractionTextView.setText(progress + "/" + nmbOfAchievements);
+                        }else {
+                            monthlyProgressbar.setProgress(progress);
+                            monthProgressTextView.setText(progress + "/" + nmbOfAchievements);
+                        }
+
+                    }
 
 
 
         }
         if(achievementType.equals(DAILY_KEY)) {
-            //calendarGridViewAdapter.setCalendarItems(newCalendarItems);
-            //calendarGridViewAdapter.notifyDataSetChanged();
-        }else{
+            calendarGridViewAdapter.setCalendarItems(newCalendarItems);
+            calendarGridViewAdapter.notifyDataSetChanged();
+        }else if(WEEKLY_KEY.equals(achievementType)){
             weekleyGridViewAdapter.setWeekleyItems(newCalendarItems);
             weekleyGridViewAdapter.notifyDataSetChanged();
+        }else{
+            monthlyItems = newCalendarItems;
         }
     }
 
@@ -516,6 +551,15 @@ public class CalendarFragment extends Fragment {
         }
         return tmpList;
 
+    }
+
+    private ArrayList<CalendarItem> computeCalendarItemsForMonths(ArrayList<CalendarItem> monthlyItems){
+
+        monthlyItems = new ArrayList<CalendarItem>();
+        for (int i =0; i < 12; i++)
+            monthlyItems.add(new CalendarItem(new GregorianCalendar(Calendar.getInstance().get(Calendar.YEAR), i, 1)));
+
+        return monthlyItems;
     }
 
     public void removeAchievement(String achievementName){

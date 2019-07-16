@@ -26,6 +26,7 @@ public class CalendarViewModel extends ViewModel{
     private LiveData<HashMap<String, ArrayList<Achievement>>> doneMonthlyAchievementsMatrix;
     private LiveData<HashMap<String, ArrayList<Achievement>>> doneWeekleyAchievementsMatrix;
     private CalendarRepository calendarRepo;
+    private String userId;
 
 
 
@@ -41,7 +42,7 @@ public class CalendarViewModel extends ViewModel{
             // doesn't change.
             return;
         }
-
+        this.userId = userId;
         doneAchievementsMatrix = calendarRepo.getCalendarAchievements(userId, DAILY_KEY);
         doneMonthlyAchievementsMatrix = calendarRepo.getCalendarAchievements(userId,MONTHLY_KEY);
         doneWeekleyAchievementsMatrix = calendarRepo.getCalendarAchievements(userId, WEEKLY_KEY);
@@ -62,7 +63,7 @@ public class CalendarViewModel extends ViewModel{
 
         calendarRepo.uppdateCurrentAchievementList(userId,achievementsList,achievementKey);
     }
-    public void updateAchievementDone(String achievementKey, Achievement currentAchievement, Boolean done, String userId, String dayMonth){
+    public void updateAchievementDone(String achievementKey, Achievement currentAchievement, Boolean done, String dayMonth){
 
         calendarRepo.updateAchievementDone(achievementKey,currentAchievement,done, dayMonth,userId);
 

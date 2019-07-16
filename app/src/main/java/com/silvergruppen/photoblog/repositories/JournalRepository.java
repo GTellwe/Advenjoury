@@ -23,7 +23,7 @@ public class JournalRepository {
     public LiveData<ArrayList<PostItem>> getJournalItems(String userId, final Achievement achievement) {
 
         final MutableLiveData<ArrayList<PostItem>> data = new MutableLiveData<>();
-        firebaseFirestore.collection(userId)
+        firebaseFirestore.collection("Users/"+userId+"/Posts")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override

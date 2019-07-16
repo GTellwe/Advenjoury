@@ -192,7 +192,7 @@ public class NewPostActivity extends AppCompatActivity {
                             postMap.put("achievement_name", achievement);
 
 
-                            firebaseFirestore.collection(current_user_id).add(postMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                            firebaseFirestore.collection("Users/"+current_user_id+"/Posts").add(postMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                                 @Override
                                 public void onComplete(@NonNull Task<DocumentReference> task) {
 
@@ -242,7 +242,7 @@ public class NewPostActivity extends AppCompatActivity {
         postMap.put("achievement_name", achievement);
 
 
-        firebaseFirestore.collection(current_user_id).add(postMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+        firebaseFirestore.collection("Users/"+current_user_id+"/Posts").add(postMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
             @Override
             public void onComplete(@NonNull Task<DocumentReference> task) {
 

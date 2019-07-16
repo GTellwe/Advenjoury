@@ -56,7 +56,7 @@ public class AchievementsRepository {
         return data;
     }
 
-    public LiveData<Boolean> addAchievementToFirebase(String userId, String achievementName, String topic) {
+    public LiveData<Boolean> addAchievementToFirebase(final String userId, final String achievementName, String topic) {
 
         final MutableLiveData<Boolean> response = new MutableLiveData<>();
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
@@ -65,11 +65,23 @@ public class AchievementsRepository {
         achievementData.put("points", "10");
         achievementData.put("topic", topic);
 
-        firebaseFirestore.collection("Users/" + userId + "/Achievements").document(achievementName).set(achievementData).addOnCompleteListener(new OnCompleteListener<Void>() {
+        final Map<String, Object> subtaskData = new HashMap<>();
+        subtaskData.put("numberOfChildren", "0");
+
+        final FirebaseFirestore fFirestore = FirebaseFirestore.getInstance();
+        fFirestore.collection("Users/" + userId + "/Achievements").document(achievementName).set(achievementData).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful())
-                    response.setValue(true);
+                    fFirestore.collection("Users/" + userId + "/Achievements/"+achievementName+"/subtasks").document("goal").set(subtaskData).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful())
+                                response.setValue(true);
+                            else
+                                response.setValue(false);
+                        }
+                    });
                 else
                     response.setValue(false);
             }

@@ -107,6 +107,7 @@ public class HowtoFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        //Toast.makeText(getContext(),"view created", Toast.LENGTH_LONG).show();
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_howto, container, false);
         taskTreeContainer = view.findViewById(R.id.task_tree_container);
@@ -272,12 +273,28 @@ public class HowtoFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        final Observer<HashMap<String, ArrayList<Achievement>>> taskTreeObserver = new Observer<HashMap<String, ArrayList<Achievement>>>() {
+            @Override
+            public void onChanged(@Nullable final HashMap<String, ArrayList<Achievement>> newTaskTree) {
+                uppdateTaskTreeView2(newTaskTree,adjustableTaskTreeContainer);
+            }
+        };
+        viewModel.getTaskTree().observe(this,taskTreeObserver);
+    }
+
     private void uppdateTaskTreeView2(HashMap<String, ArrayList<Achievement>> newTaskTree, LinearLayout adjustableTaskTreeContainer){
 
         ArrayList<Achievement> children = newTaskTree.get("goal");
 
-        if(children == null)
+        if(children == null){
+            adjustableTaskTreeContainer.removeAllViews();
             return;
+        }
+
 
         // add the root achievement goal to the hashmap
         Achievement parentAchievement = new Achievement("goal",children,addAchievementButton);
